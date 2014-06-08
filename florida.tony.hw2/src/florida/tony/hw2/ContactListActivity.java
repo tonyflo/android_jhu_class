@@ -36,7 +36,7 @@ public class ContactListActivity extends ActionBarActivity {
 
 				Contact contact = contactList.get(position);
 
-				//implicit intent
+				// implicit intent
 				Intent intent = new Intent("florida.tony.hw2.display");
 				intent.putExtra("contact", contact);
 				startActivityForResult(intent, DISPLAY_CONTACT);
@@ -57,8 +57,8 @@ public class ContactListActivity extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_create:
-			
-			//explicit intent
+
+			// explicit intent
 			Intent intent = new Intent(this, EditActivity.class);
 			intent.putExtra("contact", new Contact("", "", "", "", "", "", "",
 					""));
