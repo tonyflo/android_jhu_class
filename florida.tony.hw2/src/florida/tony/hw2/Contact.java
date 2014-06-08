@@ -14,22 +14,6 @@ public class Contact implements Serializable {
 	private String birthday;
 	private String homePhone;
 	private String workPhone;
-
-	/**
-	 * @return the workPhone
-	 */
-	public String getWorkPhone() {
-		return workPhone;
-	}
-
-	/**
-	 * @param workPhone
-	 *            the workPhone to set
-	 */
-	public void setWorkPhone(String workPhone) {
-		this.workPhone = workPhone;
-	}
-
 	private String mobilePhone;
 	private String emailAddress;
 
@@ -135,6 +119,21 @@ public class Contact implements Serializable {
 	 */
 	public void setHomePhone(String homePhone) {
 		this.homePhone = homePhone;
+	}
+
+	/**
+	 * @return the workPhone
+	 */
+	public String getWorkPhone() {
+		return workPhone;
+	}
+
+	/**
+	 * @param workPhone
+	 *            the workPhone to set
+	 */
+	public void setWorkPhone(String workPhone) {
+		this.workPhone = workPhone;
 	}
 
 	/**

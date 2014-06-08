@@ -25,6 +25,10 @@
         <activity
             android:name="florida.tony.hw2.DisplayActivity"
             android:label="@string/display_contact" >
+            <intent-filter>
+                <action android:name="florida.tony.hw2.display" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
             android:name="florida.tony.hw2.EditActivity"
