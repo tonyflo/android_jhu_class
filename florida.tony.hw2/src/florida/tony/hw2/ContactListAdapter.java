@@ -11,18 +11,20 @@ public class ContactListAdapter extends BaseAdapter {
 
 	private ContactList contactList;
 	private LayoutInflater layoutInflater;
-	
-	public ContactListAdapter(ContactList contactList, LayoutInflater layoutInflater) {
+
+	public ContactListAdapter(ContactList contactList,
+			LayoutInflater layoutInflater) {
 		this.contactList = contactList;
 		this.layoutInflater = layoutInflater;
-		
+
 		contactList.addChangeListener(new ChangeListener() {
-			@Override public void changed() {
+			@Override
+			public void changed() {
 				notifyDataSetChanged();
 			}
 		});
 	}
-	
+
 	@Override
 	public int getCount() {
 		return contactList.size();
@@ -45,17 +47,19 @@ public class ContactListAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if(convertView == null) {
+		if (convertView == null) {
 			convertView = layoutInflater.inflate(R.layout.contact_row, null);
 		}
-		
-		TextView contactName = (TextView) convertView.findViewById(R.id.display_name);
-		TextView contactPhone = (TextView) convertView.findViewById(R.id.home_phone);
-		
+
+		TextView contactName = (TextView) convertView
+				.findViewById(R.id.display_name);
+		TextView contactPhone = (TextView) convertView
+				.findViewById(R.id.home_phone);
+
 		Contact contact = (Contact) getItem(position);
 		contactName.setText(contact.getDisplayName());
 		contactPhone.setText(contact.getHomePhone());
-		
+
 		return convertView;
 	}
 

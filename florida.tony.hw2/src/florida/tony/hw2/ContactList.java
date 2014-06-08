@@ -4,29 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContactList {
-	
+
 	public interface ChangeListener {
 		void changed();
 	}
-	
+
 	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
 	private List<Contact> contacts = new ArrayList<Contact>();
-	
+
 	public void addChangeListener(ChangeListener changeListener) {
 		listeners.add(changeListener);
 	}
+
 	public void removeChangeListener(ChangeListener changeListener) {
 		listeners.remove(changeListener);
 	}
 
-	
-	public void merge(Contact contact)
-	{
+	public void merge(Contact contact) {
 		boolean found = false;
-		for(Contact contactInList : contacts)
-		{
-			if(contactInList.getId() == contact.getId())
-			{
+		for (Contact contactInList : contacts) {
+			if (contactInList.getId() == contact.getId()) {
 				contactInList.setDisplayName(contact.getDisplayName());
 				contactInList.setFirstName(contact.getFirstName());
 				contactInList.setLastName(contact.getLastName());
@@ -39,18 +36,16 @@ public class ContactList {
 				break;
 			}
 		}
-		
-		if(!found)
-		{
+
+		if (!found) {
 			contacts.add(contact);
 		}
-		
-		for(ChangeListener changeListener : listeners)
-		{
+
+		for (ChangeListener changeListener : listeners) {
 			changeListener.changed();
 		}
 	}
-	
+
 	/**
 	 * @param object
 	 * @return
@@ -94,12 +89,14 @@ public class ContactList {
 		return contacts.size();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		return "ContactList [Items=" + contacts + "]";
 	}
-	
+
 }
