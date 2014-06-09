@@ -87,5 +87,4 @@ public class ContactListAdapter extends BaseAdapter {
 	public boolean isEnabled(int position) {
 		return true;
 	}
-
 }

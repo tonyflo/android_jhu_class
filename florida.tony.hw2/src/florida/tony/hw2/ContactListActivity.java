@@ -1,8 +1,10 @@
 package florida.tony.hw2;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,18 +17,21 @@ public class ContactListActivity extends ActionBarActivity {
 	private static final int DISPLAY_CONTACT = 2;
 	private static final int EDIT_CONTACT = 3;
 	private ContactList contactList;
+	ListView listView;
+	private ContactListAdapter contactListAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		ListView listView = (ListView) findViewById(R.id.contact_list_view);
+		listView = (ListView) findViewById(R.id.contact_list_view);
 
 		contactList = new ContactList();
 
-		listView.setAdapter(new ContactListAdapter(contactList,
-				getLayoutInflater()));
+		contactListAdapter = new ContactListAdapter(contactList,
+				getLayoutInflater());
+		listView.setAdapter(contactListAdapter);
 
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -43,14 +48,6 @@ public class ContactListActivity extends ActionBarActivity {
 
 			}
 		});
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 
 	@Override
