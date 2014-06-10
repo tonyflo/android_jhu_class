@@ -27,7 +27,7 @@ public class DisplayActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_display);
 
-		contact = (Contact) getIntent().getSerializableExtra("contact");
+		contact = (Contact) getIntent().getParcelableExtra("contact");
 
 		displayName = (TextView) findViewById(R.id.display_name);
 		firstName = (TextView) findViewById(R.id.first_name);
@@ -96,7 +96,7 @@ public class DisplayActivity extends ActionBarActivity {
 
 		switch (requestCode) {
 		case EDIT_CONTACT:
-			contact = (Contact) data.getSerializableExtra("contact");
+			contact = (Contact) data.getParcelableExtra("contact");
 
 			// update contact fields
 			setContactFields();

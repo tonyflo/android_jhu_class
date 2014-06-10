@@ -30,10 +30,10 @@ public class Contact implements Parcelable {
 		this.mobilePhone = mobilePhone;
 		this.emailAddress = emailAddress;
 	}
-	
-	private Contact(long id, String displayName, String firstName, String lastName,
-			String birthday, String homePhone, String workPhone,
-			String mobilePhone, String emailAddress) {
+
+	private Contact(long id, String displayName, String firstName,
+			String lastName, String birthday, String homePhone,
+			String workPhone, String mobilePhone, String emailAddress) {
 		super();
 		this.id = id;
 		this.displayName = displayName;
@@ -212,12 +212,12 @@ public class Contact implements Parcelable {
 		dest.writeString(mobilePhone);
 		dest.writeString(emailAddress);
 	}
-	
-	public static Parcelable.Creator<Contact> CREATOR = new Creator<Contact> () {
+
+	public static Parcelable.Creator<Contact> CREATOR = new Creator<Contact>() {
 
 		@Override
 		public Contact createFromParcel(Parcel source) {
-			
+
 			long id = source.readLong();
 			String displayName = source.readString();
 			String firstName = source.readString();
@@ -227,8 +227,9 @@ public class Contact implements Parcelable {
 			String workPhone = source.readString();
 			String mobilePhone = source.readString();
 			String emailAddress = source.readString();
-			
-			return new Contact(id, displayName, firstName, lastName, birthday, homePhone, workPhone, mobilePhone, emailAddress);
+
+			return new Contact(id, displayName, firstName, lastName, birthday,
+					homePhone, workPhone, mobilePhone, emailAddress);
 
 		}
 
@@ -236,7 +237,7 @@ public class Contact implements Parcelable {
 		public Contact[] newArray(int size) {
 			return new Contact[size];
 		}
-		
+
 	};
 
 }
