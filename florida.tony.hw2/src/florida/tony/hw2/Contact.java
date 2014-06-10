@@ -1,13 +1,12 @@
 package florida.tony.hw2;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Contact implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class Contact implements Parcelable {
 
 	private static long nextId = 1;
-	private long id = nextId++;
+	private long id;
 	private String displayName;
 	private String firstName;
 	private String lastName;
@@ -21,6 +20,22 @@ public class Contact implements Serializable {
 			String birthday, String homePhone, String workPhone,
 			String mobilePhone, String emailAddress) {
 		super();
+		this.id = nextId++;
+		this.displayName = displayName;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.birthday = birthday;
+		this.homePhone = homePhone;
+		this.workPhone = workPhone;
+		this.mobilePhone = mobilePhone;
+		this.emailAddress = emailAddress;
+	}
+	
+	private Contact(long id, String displayName, String firstName, String lastName,
+			String birthday, String homePhone, String workPhone,
+			String mobilePhone, String emailAddress) {
+		super();
+		this.id = id;
 		this.displayName = displayName;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -179,5 +194,49 @@ public class Contact implements Serializable {
 				+ ", mobilePhone=" + mobilePhone + ", emailAddress="
 				+ emailAddress + "]";
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(id);
+		dest.writeString(displayName);
+		dest.writeString(firstName);
+		dest.writeString(lastName);
+		dest.writeString(birthday);
+		dest.writeString(homePhone);
+		dest.writeString(workPhone);
+		dest.writeString(mobilePhone);
+		dest.writeString(emailAddress);
+	}
+	
+	public static Parcelable.Creator<Contact> CREATOR = new Creator<Contact> () {
+
+		@Override
+		public Contact createFromParcel(Parcel source) {
+			
+			long id = source.readLong();
+			String displayName = source.readString();
+			String firstName = source.readString();
+			String lastName = source.readString();
+			String birthday = source.readString();
+			String homePhone = source.readString();
+			String workPhone = source.readString();
+			String mobilePhone = source.readString();
+			String emailAddress = source.readString();
+			
+			return new Contact(id, displayName, firstName, lastName, birthday, homePhone, workPhone, mobilePhone, emailAddress);
+
+		}
+
+		@Override
+		public Contact[] newArray(int size) {
+			return new Contact[size];
+		}
+		
+	};
 
 }

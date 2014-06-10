@@ -3,7 +3,10 @@ package florida.tony.hw2;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactList {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class ContactList implements Parcelable {
 
 	public interface ChangeListener {
 		void changed();
@@ -98,5 +101,41 @@ public class ContactList {
 	public String toString() {
 		return "ContactList [Items=" + contacts + "]";
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(contacts.size());
+		for (Contact contact : contacts) {
+			dest.writeParcelable(contact, 0);
+		}
+	}
+
+	public static Parcelable.Creator<ContactList> CREATOR = new Creator<ContactList>() {
+
+		@Override
+		public ContactList createFromParcel(Parcel source) {
+			ContactList list = new ContactList();
+			int size = source.readInt();
+
+			for (int i = 0; i < size; i++) {
+				Contact contact = source.readParcelable(getClass()
+						.getClassLoader());
+				list.add(contact);
+			}
+
+			return list;
+		}
+
+		@Override
+		public ContactList[] newArray(int size) {
+			return new ContactList[size];
+		}
+
+	};
 
 }

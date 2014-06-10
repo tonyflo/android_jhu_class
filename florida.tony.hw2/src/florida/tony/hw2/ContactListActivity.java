@@ -1,11 +1,8 @@
 package florida.tony.hw2;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,7 +24,12 @@ public class ContactListActivity extends ActionBarActivity {
 
 		listView = (ListView) findViewById(R.id.contact_list_view);
 
-		contactList = new ContactList();
+		if (savedInstanceState == null) {
+
+			contactList = new ContactList();
+		} else {
+			contactList = savedInstanceState.getParcelable("contactList");
+		}
 
 		contactListAdapter = new ContactListAdapter(contactList,
 				getLayoutInflater());
@@ -48,6 +50,14 @@ public class ContactListActivity extends ActionBarActivity {
 
 			}
 		});
+	}
+
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		// save the contact list
+		outState.putParcelable("contactList", contactList);
+		;
 	}
 
 	@Override

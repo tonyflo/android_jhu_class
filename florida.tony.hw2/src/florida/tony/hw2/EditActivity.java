@@ -24,7 +24,7 @@ public class EditActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_edit);
 
-		contact = (Contact) getIntent().getSerializableExtra("contact");
+		contact = (Contact) getIntent().getParcelableExtra("contact");
 
 		displayName = (EditText) findViewById(R.id.display_name);
 		firstName = (EditText) findViewById(R.id.first_name);
