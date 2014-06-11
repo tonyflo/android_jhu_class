@@ -35,6 +35,11 @@
             android:name="florida.tony.hw3.EditActivity"
             android:label="@string/edit_contact" >
         </activity>
+        
+        <provider android:name=".ContactContentProvider"
+            android:authorities="florida.tony.hw3"
+            android:exported="false"/>
+            
     </application>
 
 </manifest>

@@ -5,8 +5,7 @@ import android.os.Parcelable;
 
 public class Contact implements Parcelable {
 
-	private static long nextId = 1;
-	private long id;
+	private long id = -1;
 	private String displayName;
 	private String firstName;
 	private String lastName;
@@ -16,11 +15,9 @@ public class Contact implements Parcelable {
 	private String mobilePhone;
 	private String emailAddress;
 
-	public Contact(String displayName, String firstName, String lastName,
+	Contact(String displayName, String firstName, String lastName,
 			String birthday, String homePhone, String workPhone,
 			String mobilePhone, String emailAddress) {
-		super();
-		this.id = nextId++;
 		this.displayName = displayName;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -31,10 +28,9 @@ public class Contact implements Parcelable {
 		this.emailAddress = emailAddress;
 	}
 
-	private Contact(long id, String displayName, String firstName,
+	Contact(long id, String displayName, String firstName,
 			String lastName, String birthday, String homePhone,
 			String workPhone, String mobilePhone, String emailAddress) {
-		super();
 		this.id = id;
 		this.displayName = displayName;
 		this.firstName = firstName;
@@ -57,7 +53,7 @@ public class Contact implements Parcelable {
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(long id) {
+	void setId(long id) {
 		this.id = id;
 	}
 

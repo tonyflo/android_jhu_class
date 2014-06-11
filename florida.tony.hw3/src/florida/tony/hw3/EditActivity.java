@@ -24,7 +24,7 @@ public class EditActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_edit);
 
-		contact = (Contact) getIntent().getParcelableExtra("contact");
+		long contactId = getIntent().getLongExtra("contactId", -1);
 
 		displayName = (EditText) findViewById(R.id.display_name);
 		firstName = (EditText) findViewById(R.id.first_name);
@@ -35,6 +35,15 @@ public class EditActivity extends ActionBarActivity {
 		mobilePhone = (EditText) findViewById(R.id.mobile_phone);
 		emailAddress = (EditText) findViewById(R.id.email_address);
 
+		if(contactId != -1)
+		{
+			contact = ContactContentProvider.findContact(this, contactId);
+		}
+		else
+		{
+			contact = new Contact("", "", "", "", "", "", "", "");
+		}
+		
 		displayName.setText(contact.getDisplayName());
 		firstName.setText(contact.getFirstName());
 		lastName.setText(contact.getLastName());
@@ -61,9 +70,10 @@ public class EditActivity extends ActionBarActivity {
 			this.contact.setWorkPhone(workPhone.getText().toString());
 			this.contact.setMobilePhone(mobilePhone.getText().toString());
 			this.contact.setEmailAddress(emailAddress.getText().toString());
+			
+			ContactContentProvider.updateContact(this, this.contact);
+			getIntent().putExtra("contactId", this.contact);
 
-			getIntent().putExtra("contact", this.contact);
-			setResult(RESULT_OK, getIntent());
 			finish();
 			return true;
 		default:
