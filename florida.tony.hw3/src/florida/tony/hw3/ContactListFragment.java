@@ -20,6 +20,14 @@ import android.widget.ListView;
 
 public class ContactListFragment extends Fragment {
 
+	public interface ContactListFragmentListener {
+		void onCreate();
+
+		void onEdit(long id);
+	}
+
+	private ContactListFragmentListener listFragmentListener;
+
 	private static final int CONTACT_LOADER = 1;
 	private SimpleCursorAdapter cursorAdapter;
 
@@ -45,9 +53,12 @@ public class ContactListFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Intent intent = new Intent(getActivity(), EditActivity.class);
-				intent.putExtra("contactId", id);
-				startActivity(intent);
+				if (listFragmentListener == null) {
+					throw new RuntimeException(
+							"You must register a ContactListFragmentListener first.");
+				}
+
+				listFragmentListener.onEdit(id);
 			}
 		});
 
@@ -67,14 +78,23 @@ public class ContactListFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_create:
-			// bring up the edit activity
-			Intent intent = new Intent(getActivity(), EditActivity.class);
-			intent.putExtra("todoItemId", (long) -1);
-			startActivity(intent);
+
+			if (listFragmentListener == null) {
+				throw new RuntimeException(
+						"You must register a ContactListFragmentListener first.");
+			}
+
+			listFragmentListener.onCreate();
+
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	public void setListFragmentListener(
+			ContactListFragmentListener listFragmentListener) {
+		this.listFragmentListener = listFragmentListener;
 	}
 
 	private LoaderCallbacks<Cursor> loaderCallbacks = new LoaderCallbacks<Cursor>() {

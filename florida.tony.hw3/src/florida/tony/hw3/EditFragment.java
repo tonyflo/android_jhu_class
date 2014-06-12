@@ -12,6 +12,14 @@ import android.widget.EditText;
 
 public class EditFragment extends Fragment {
 
+	public interface EditFragmentListener {
+		void onDone(Contact contact);
+
+		void onCancel();
+	}
+
+	private EditFragmentListener editFragmentListener;
+
 	private EditText displayName;
 	private EditText firstName;
 	private EditText lastName;
@@ -23,23 +31,7 @@ public class EditFragment extends Fragment {
 
 	private Contact contact;
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_edit, container, false);
-
-		long contactId = getActivity().getIntent()
-				.getLongExtra("contactId", -1);
-
-		displayName = (EditText) view.findViewById(R.id.display_name);
-		firstName = (EditText) view.findViewById(R.id.first_name);
-		lastName = (EditText) view.findViewById(R.id.last_name);
-		birthday = (EditText) view.findViewById(R.id.birthday);
-		homePhone = (EditText) view.findViewById(R.id.home_phone);
-		workPhone = (EditText) view.findViewById(R.id.work_phone);
-		mobilePhone = (EditText) view.findViewById(R.id.mobile_phone);
-		emailAddress = (EditText) view.findViewById(R.id.email_address);
-
+	public void setContactId(long contactId) {
 		if (contactId != -1) {
 			contact = ContactContentProvider.findContact(getActivity(),
 					contactId);
@@ -55,6 +47,21 @@ public class EditFragment extends Fragment {
 		workPhone.setText(contact.getWorkPhone());
 		mobilePhone.setText(contact.getMobilePhone());
 		emailAddress.setText(contact.getEmailAddress());
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_edit, container, false);
+
+		displayName = (EditText) view.findViewById(R.id.display_name);
+		firstName = (EditText) view.findViewById(R.id.first_name);
+		lastName = (EditText) view.findViewById(R.id.last_name);
+		birthday = (EditText) view.findViewById(R.id.birthday);
+		homePhone = (EditText) view.findViewById(R.id.home_phone);
+		workPhone = (EditText) view.findViewById(R.id.work_phone);
+		mobilePhone = (EditText) view.findViewById(R.id.mobile_phone);
+		emailAddress = (EditText) view.findViewById(R.id.email_address);
 
 		setHasOptionsMenu(true);
 		return view;
@@ -64,7 +71,13 @@ public class EditFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_cancel:
-			getActivity().finish();
+			if (editFragmentListener == null) {
+				throw new RuntimeException(
+						"You must set an EditFragmentListener");
+			}
+
+			editFragmentListener.onCancel();
+
 			return true;
 		case R.id.action_done:
 			this.contact.setDisplayName(displayName.getText().toString());
@@ -77,9 +90,13 @@ public class EditFragment extends Fragment {
 			this.contact.setEmailAddress(emailAddress.getText().toString());
 
 			ContactContentProvider.updateContact(getActivity(), this.contact);
-			getActivity().getIntent().putExtra("contactId", this.contact);
 
-			getActivity().finish();
+			if (editFragmentListener == null) {
+				throw new RuntimeException(
+						"You must set an EditFragmentListener");
+			}
+			editFragmentListener.onDone(this.contact);
+
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -91,5 +108,10 @@ public class EditFragment extends Fragment {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		inflater.inflate(R.menu.edit, menu);
+	}
+
+	public void setEditFragmentListener(
+			EditFragmentListener editFragmentListener) {
+		this.editFragmentListener = editFragmentListener;
 	}
 }
