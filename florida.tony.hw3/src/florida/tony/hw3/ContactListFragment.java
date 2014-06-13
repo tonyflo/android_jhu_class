@@ -1,6 +1,5 @@
 package florida.tony.hw3;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +7,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,11 +22,15 @@ public class ContactListFragment extends Fragment {
 
 	public interface ContactListFragmentListener {
 		void onCreate();
-
 		void onEdit(long id);
 	}
 
 	private ContactListFragmentListener listFragmentListener;
+	
+	public void setListFragmentListener(
+			ContactListFragmentListener listFragmentListener) {
+		this.listFragmentListener = listFragmentListener;
+	}
 
 	private static final int CONTACT_LOADER = 1;
 	private SimpleCursorAdapter cursorAdapter;
@@ -90,11 +94,6 @@ public class ContactListFragment extends Fragment {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	public void setListFragmentListener(
-			ContactListFragmentListener listFragmentListener) {
-		this.listFragmentListener = listFragmentListener;
 	}
 
 	private LoaderCallbacks<Cursor> loaderCallbacks = new LoaderCallbacks<Cursor>() {
