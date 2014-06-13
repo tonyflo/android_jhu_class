@@ -2,6 +2,7 @@ package florida.tony.hw3;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +21,11 @@ public class EditFragment extends Fragment {
 
 	private EditFragmentListener editFragmentListener;
 
+	public void setEditFragmentListener(
+			EditFragmentListener editFragmentListener) {
+		this.editFragmentListener = editFragmentListener;
+	}
+
 	private EditText displayName;
 	private EditText firstName;
 	private EditText lastName;
@@ -32,6 +38,7 @@ public class EditFragment extends Fragment {
 	private Contact contact;
 
 	public void setContactId(long contactId) {
+		Log.d("edit frag", "set id");
 		if (contactId != -1) {
 			contact = ContactContentProvider.findContact(getActivity(),
 					contactId);
@@ -68,6 +75,13 @@ public class EditFragment extends Fragment {
 	}
 
 	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		// Inflate the menu; this adds items to the action bar if it is present.
+		inflater.inflate(R.menu.edit, menu);
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_cancel:
@@ -95,23 +109,12 @@ public class EditFragment extends Fragment {
 				throw new RuntimeException(
 						"You must set an EditFragmentListener");
 			}
+			
 			editFragmentListener.onDone(this.contact);
 
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-		// Inflate the menu; this adds items to the action bar if it is present.
-		inflater.inflate(R.menu.edit, menu);
-	}
-
-	public void setEditFragmentListener(
-			EditFragmentListener editFragmentListener) {
-		this.editFragmentListener = editFragmentListener;
 	}
 }

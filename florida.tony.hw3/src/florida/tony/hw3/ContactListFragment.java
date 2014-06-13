@@ -7,7 +7,6 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,9 +22,9 @@ public class ContactListFragment extends Fragment {
 	public interface ContactListFragmentListener {
 		void onCreate();
 
-		void onEdit(long id);
+		void onDisplay(long id);
 	}
-	
+
 	private ListView listView;
 	private ContactListFragmentListener listFragmentListener;
 
@@ -63,7 +62,7 @@ public class ContactListFragment extends Fragment {
 							"You must register a ContactListFragmentListener first.");
 				}
 
-				listFragmentListener.onEdit(id);
+				listFragmentListener.onDisplay(id);
 			}
 		});
 
