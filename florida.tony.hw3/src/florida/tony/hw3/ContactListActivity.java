@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import florida.tony.hw3.ContactListFragment.ContactListFragmentListener;
+import florida.tony.hw3.EditFragment.EditFragmentListener;
 
 public class ContactListActivity extends ActionBarActivity {
 	private EditFragment editFragment;
@@ -21,12 +22,12 @@ public class ContactListActivity extends ActionBarActivity {
 				.findFragmentById(R.id.listFragment);
 		editFragment = (EditFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.editFragment);
-		displayFragment = (DisplayFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.displayFragment);
+		//displayFragment = (DisplayFragment) getSupportFragmentManager()
+		//		.findFragmentById(R.id.displayFragment);
 
 //		FragmentTransaction transaction = getSupportFragmentManager()
 //				.beginTransaction();
-//		transaction.hide(displayFragment);
+//		transaction.hide(editFragment);
 //		transaction.commit();
 
 		final boolean dualMode = editFragment != null
@@ -59,36 +60,36 @@ public class ContactListActivity extends ActionBarActivity {
 
 			}
 		});
-//
-//		if (dualMode) {
-//			editFragment.setEditFragmentListener(new EditFragmentListener() {
-//
-//				@Override
-//				public void onDone(Contact contact) {
+
+		if (dualMode) {
+			editFragment.setEditFragmentListener(new EditFragmentListener() {
+
+				@Override
+				public void onDone(Contact contact) {
 //					FragmentTransaction transaction = getSupportFragmentManager()
 //							.beginTransaction();
 //					transaction.hide(editFragment);
 //					transaction.show(displayFragment);
 //					transaction.commit();
-//					// displayFragment.setsetContactId(contact.getId()); TODO
-//				}
-//
-//				@Override
-//				public void onCancel() {
+//					displayFragment.setContactId(contact.getId());
+				}
+
+				@Override
+				public void onCancel() {
+					editFragment.setContactId(listFragment.getSelectedId());
 //					FragmentTransaction transaction = getSupportFragmentManager()
 //							.beginTransaction();
 //					transaction.show(editFragment);
 //					transaction.hide(displayFragment);
 //					transaction.commit();
-//				}
-//
-//			});
-//			// TODO
-//			// displayFragment.setDisplayFragmentListener(new
-//			// DisplayFragmentListener() {
-//			//
-//			//
-//			// });
-//		}
+				}
+
+			});
+//			 displayFragment.setDisplayFragmentListener(new
+//			 DisplayFragmentListener() {
+//			
+//			
+//			 });
+		}
 	}
 }

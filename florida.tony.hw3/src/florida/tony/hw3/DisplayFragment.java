@@ -25,6 +25,24 @@ public class DisplayFragment extends Fragment {
 	private TextView emailAddress;
 
 	private Contact contact;
+	
+	public void setContactId(long contactId) {
+		if (contactId != -1) {
+			contact = ContactContentProvider.findContact(getActivity(),
+					contactId);
+		} else {
+			contact = new Contact("", "", "", "", "", "", "", "");
+		}
+
+		displayName.setText(contact.getDisplayName());
+		firstName.setText(contact.getFirstName());
+		lastName.setText(contact.getLastName());
+		birthday.setText(contact.getBirthday());
+		homePhone.setText(contact.getHomePhone());
+		workPhone.setText(contact.getWorkPhone());
+		mobilePhone.setText(contact.getMobilePhone());
+		emailAddress.setText(contact.getEmailAddress());
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

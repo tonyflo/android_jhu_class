@@ -22,11 +22,13 @@ public class ContactListFragment extends Fragment {
 
 	public interface ContactListFragmentListener {
 		void onCreate();
+
 		void onEdit(long id);
 	}
-
-	private ContactListFragmentListener listFragmentListener;
 	
+	private ListView listView;
+	private ContactListFragmentListener listFragmentListener;
+
 	public void setListFragmentListener(
 			ContactListFragmentListener listFragmentListener) {
 		this.listFragmentListener = listFragmentListener;
@@ -40,8 +42,7 @@ public class ContactListFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-		ListView listView = (ListView) view
-				.findViewById(R.id.contact_list_view);
+		listView = (ListView) view.findViewById(R.id.contact_list_view);
 
 		String[] from = { ContactContentProvider.ID,
 				ContactContentProvider.DISPLAY_NAME,
@@ -125,4 +126,9 @@ public class ContactListFragment extends Fragment {
 			cursorAdapter.swapCursor(null); // clear the data
 		}
 	};
+
+	public long getSelectedId() {
+		return listView.getAdapter().getItemId(
+				listView.getCheckedItemPosition());
+	}
 }
