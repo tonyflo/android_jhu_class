@@ -59,6 +59,7 @@ public class EditFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.d("edit frag", "on create");
 		View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
 		displayName = (EditText) view.findViewById(R.id.display_name);
@@ -85,6 +86,7 @@ public class EditFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_cancel:
+			Log.d("edit frag", "cancel");
 			if (editFragmentListener == null) {
 				throw new RuntimeException(
 						"You must set an EditFragmentListener");
@@ -94,6 +96,7 @@ public class EditFragment extends Fragment {
 
 			return true;
 		case R.id.action_done:
+			Log.d("edit frag", "done");
 			this.contact.setDisplayName(displayName.getText().toString());
 			this.contact.setFirstName(firstName.getText().toString());
 			this.contact.setLastName(lastName.getText().toString());

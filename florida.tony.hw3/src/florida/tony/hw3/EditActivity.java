@@ -10,6 +10,7 @@ public class EditActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_edit);
+		Log.d("edit", "on create");
 
 		EditFragment editFragment = (EditFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.editFragment);

@@ -46,6 +46,11 @@ public class DisplayFragment extends Fragment {
 			contact = new Contact("", "", "", "", "", "", "", "");
 		}
 
+		setContactFields();
+	}
+
+	// populate fields with contact information
+	public void setContactFields() {
 		displayName.setText(contact.getDisplayName());
 		firstName.setText(contact.getFirstName());
 		lastName.setText(contact.getLastName());
@@ -59,6 +64,7 @@ public class DisplayFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.d("display frag", "on create");
 		View view = inflater.inflate(R.layout.fragment_display, container,
 				false);
 
@@ -86,7 +92,7 @@ public class DisplayFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_cancel:
-
+			Log.d("display frag", "cancel");
 			if (displayFragmentListener == null) {
 				throw new RuntimeException(
 						"You must set a DisplayFragmentListener");
@@ -95,6 +101,7 @@ public class DisplayFragment extends Fragment {
 			displayFragmentListener.onCancel();
 			return true;
 		case R.id.action_edit:
+			Log.d("display frag", "edit");
 			this.contact.setDisplayName(displayName.getText().toString());
 			this.contact.setFirstName(firstName.getText().toString());
 			this.contact.setLastName(lastName.getText().toString());

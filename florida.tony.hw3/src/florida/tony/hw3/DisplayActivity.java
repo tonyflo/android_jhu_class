@@ -12,6 +12,7 @@ public class DisplayActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_display);
+		Log.d("display", "on create");
 
 		DisplayFragment displayFragment = (DisplayFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.displayFragment);
