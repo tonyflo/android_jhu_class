@@ -6,6 +6,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class EditActivity extends ActionBarActivity {
 
 	private EditText displayName;

@@ -10,6 +10,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class ContactListActivity extends ActionBarActivity {
 
 	private static final int DISPLAY_CONTACT = 2;

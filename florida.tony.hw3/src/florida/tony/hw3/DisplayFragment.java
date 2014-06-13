@@ -11,6 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class DisplayFragment extends Fragment {
 
 	public interface DisplayFragmentListener {

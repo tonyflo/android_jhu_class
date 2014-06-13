@@ -3,6 +3,10 @@ package florida.tony.hw2;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class Contact implements Parcelable {
 
 	private static long nextId = 1;

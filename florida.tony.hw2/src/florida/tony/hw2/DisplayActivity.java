@@ -7,6 +7,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class DisplayActivity extends ActionBarActivity {
 
 	private static final int EDIT_CONTACT = 3;

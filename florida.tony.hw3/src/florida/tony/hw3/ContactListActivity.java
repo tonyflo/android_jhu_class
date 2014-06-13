@@ -9,6 +9,10 @@ import florida.tony.hw3.ContactListFragment.ContactListFragmentListener;
 import florida.tony.hw3.DisplayFragment.DisplayFragmentListener;
 import florida.tony.hw3.EditFragment.EditFragmentListener;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class ContactListActivity extends ActionBarActivity {
 	private EditFragment editFragment;
 	private ContactListFragment listFragment;

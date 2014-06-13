@@ -10,6 +10,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class ContactContentProvider extends ContentProvider {
 	// Database Constants
 	private static final String CONTACT_TABLE = "contact";

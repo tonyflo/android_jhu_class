@@ -6,6 +6,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import florida.tony.hw3.DisplayFragment.DisplayFragmentListener;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class DisplayActivity extends ActionBarActivity {
 
 	@Override

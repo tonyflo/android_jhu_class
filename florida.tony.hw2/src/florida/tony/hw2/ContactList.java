@@ -6,6 +6,10 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class ContactList implements Parcelable {
 
 	public interface ChangeListener {

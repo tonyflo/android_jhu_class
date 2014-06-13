@@ -7,6 +7,10 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import florida.tony.hw2.ContactList.ChangeListener;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
+
 public class ContactListAdapter extends BaseAdapter {
 
 	private ContactList contactList;
