@@ -19,7 +19,7 @@ public class ContactListActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		Log.d("contact list activity", "on create");
-		
+
 		listFragment = (ContactListFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.listFragment);
 		editFragment = (EditFragment) getSupportFragmentManager()
@@ -40,14 +40,25 @@ public class ContactListActivity extends ActionBarActivity {
 			Log.d("list activity", displayFragment + "");
 			transaction.hide(displayFragment);
 			transaction.commit();
+			editFragment.setContactId(-1);
 		}
 
 		listFragment.setListFragmentListener(new ContactListFragmentListener() {
 			@Override
 			public void onDisplay(long id) {
 				if (dualMode) {
-					editFragment.setContactId(id);
+					Log.d("list activity", "dual mode");
+					displayFragment.setContactId(id);
+					
+					FragmentTransaction transaction = getSupportFragmentManager()
+							.beginTransaction();
+					transaction.hide(editFragment);
+					transaction.show(displayFragment);
+					transaction.commit();
+
+					
 				} else {
+					Log.d("list activity", "not dual mode");
 					Intent intent = new Intent(ContactListActivity.this,
 							DisplayActivity.class);
 					intent.putExtra("contactId", id);
@@ -60,6 +71,13 @@ public class ContactListActivity extends ActionBarActivity {
 			public void onCreate() {
 				if (dualMode) {
 					editFragment.setContactId(-1);
+					
+					FragmentTransaction transaction = getSupportFragmentManager()
+							.beginTransaction();
+					transaction.hide(displayFragment);
+					transaction.show(editFragment);
+					transaction.commit();
+
 				} else {
 					Intent intent = new Intent(ContactListActivity.this,
 							EditActivity.class);
@@ -69,49 +87,53 @@ public class ContactListActivity extends ActionBarActivity {
 			}
 		});
 
-		if (false) {
-		//if (dualMode) {
+		if (dualMode) {
 			editFragment.setEditFragmentListener(new EditFragmentListener() {
-
 				@Override
 				public void onDone(Contact contact) {
-					// FragmentTransaction transaction =
-					// getSupportFragmentManager()
-					// .beginTransaction();
-					// transaction.hide(editFragment);
-					// transaction.show(displayFragment);
-					// transaction.commit();
-					// displayFragment.setContactId(contact.getId());
+					FragmentTransaction transaction = getSupportFragmentManager()
+							.beginTransaction();
+					transaction.hide(editFragment);
+					transaction.show(displayFragment);
+					transaction.commit();
+					displayFragment.setContactId(contact.getId());
 				}
 
 				@Override
 				public void onCancel() {
 					editFragment.setContactId(listFragment.getSelectedId());
-					// FragmentTransaction transaction =
-					// getSupportFragmentManager()
-					// .beginTransaction();
-					// transaction.show(editFragment);
-					// transaction.hide(displayFragment);
-					// transaction.commit();
-				}
 
+
+					FragmentTransaction transaction = getSupportFragmentManager()
+							.beginTransaction();
+					transaction.hide(editFragment);
+					transaction.show(displayFragment);
+					transaction.commit();
+				}
 			});
 
 			displayFragment
 					.setDisplayFragmentListener(new DisplayFragmentListener() {
-
 						@Override
 						public void onEdit(Contact contact) {
-							// TODO Auto-generated method stub
-
+							FragmentTransaction transaction = getSupportFragmentManager()
+									.beginTransaction();
+							transaction.hide(displayFragment);
+							transaction.show(editFragment);
+							transaction.commit();
+							editFragment.setContactId(contact.getId());
 						}
 
 						@Override
 						public void onCancel() {
-							// TODO Auto-generated method stub
+							editFragment.setContactId(-1);
 
+							FragmentTransaction transaction = getSupportFragmentManager()
+									.beginTransaction();
+							transaction.hide(displayFragment);
+							transaction.show(editFragment);
+							transaction.commit();
 						}
-
 					});
 		}
 	}
