@@ -2,7 +2,6 @@ package florida.tony.hw3;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,17 +37,19 @@ public class DisplayFragment extends Fragment {
 	private TextView workPhone;
 	private TextView mobilePhone;
 	private TextView emailAddress;
+	private long contactId;
 
 	private Contact contact;
 
 	public void setContactId(long contactId) {
-		Log.d("display frag", "set id");
 		if (contactId != -1) {
 			contact = ContactContentProvider.findContact(getActivity(),
 					contactId);
 		} else {
 			contact = new Contact("", "", "", "", "", "", "", "");
 		}
+
+		this.contactId = contactId;
 
 		setContactFields();
 	}
@@ -68,7 +69,6 @@ public class DisplayFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.d("display frag", "on create");
 		View view = inflater.inflate(R.layout.fragment_display, container,
 				false);
 
@@ -86,6 +86,16 @@ public class DisplayFragment extends Fragment {
 	}
 
 	@Override
+	public void onResume() {
+		if(contactId > 0)
+		{
+			setContactId(contactId);
+		}
+		
+		super.onResume();
+	}
+
+	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -96,7 +106,6 @@ public class DisplayFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_cancel:
-			Log.d("display frag", "cancel");
 			if (displayFragmentListener == null) {
 				throw new RuntimeException(
 						"You must set a DisplayFragmentListener");
@@ -105,7 +114,6 @@ public class DisplayFragment extends Fragment {
 			displayFragmentListener.onCancel();
 			return true;
 		case R.id.action_edit:
-			Log.d("display frag", "edit");
 			this.contact.setDisplayName(displayName.getText().toString());
 			this.contact.setFirstName(firstName.getText().toString());
 			this.contact.setLastName(lastName.getText().toString());

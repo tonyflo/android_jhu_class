@@ -32,9 +32,9 @@ public class Contact implements Parcelable {
 		this.emailAddress = emailAddress;
 	}
 
-	Contact(long id, String displayName, String firstName,
-			String lastName, String birthday, String homePhone,
-			String workPhone, String mobilePhone, String emailAddress) {
+	Contact(long id, String displayName, String firstName, String lastName,
+			String birthday, String homePhone, String workPhone,
+			String mobilePhone, String emailAddress) {
 		this.id = id;
 		this.displayName = displayName;
 		this.firstName = firstName;

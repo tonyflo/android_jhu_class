@@ -9,7 +9,6 @@ import java.util.Locale;
 import florida.tony.hw3.DatePickerDialogFragment.OnDatePickerDialogFragmentDateSetListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -56,7 +55,6 @@ public class EditFragment extends Fragment implements
 	private Contact contact;
 
 	public void setContactId(long contactId) {
-		Log.d("edit frag", "set id");
 		if (contactId != -1) {
 			contact = ContactContentProvider.findContact(getActivity(),
 					contactId);
@@ -71,15 +69,14 @@ public class EditFragment extends Fragment implements
 		workPhone.setText(contact.getWorkPhone());
 		mobilePhone.setText(contact.getMobilePhone());
 		emailAddress.setText(contact.getEmailAddress());
-		
-		//get text for birthday button
+
+		// get text for birthday button
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 		Date birthdayAsDate;
 		try {
-			if(!contact.getBirthday().isEmpty())
-			{
+			if (!contact.getBirthday().isEmpty()) {
 				birthdayAsDate = format.parse(contact.getBirthday());
-				birthday.setTime(birthdayAsDate);	
+				birthday.setTime(birthdayAsDate);
 			}
 			updateDateButtonText("Birthday", birthdayButton, birthday);
 		} catch (ParseException e) {
@@ -90,7 +87,6 @@ public class EditFragment extends Fragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.d("edit frag", "on create");
 		View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
 		displayName = (EditText) view.findViewById(R.id.display_name);
@@ -109,12 +105,16 @@ public class EditFragment extends Fragment implements
 		}
 
 		updateDateButtonText("Birthday", birthdayButton, birthday);
-		
+
 		birthdayButton.setOnClickListener(new OnClickListener() {
-			@Override public void onClick(View v) {
-				DatePickerDialogFragment fragment = DatePickerDialogFragment.create(EditFragment.this, BIRTH_DAY, birthday);
-				fragment.show(getActivity().getSupportFragmentManager(), "setting birthday");
-			}});
+			@Override
+			public void onClick(View v) {
+				DatePickerDialogFragment fragment = DatePickerDialogFragment
+						.create(EditFragment.this, BIRTH_DAY, birthday);
+				fragment.show(getActivity().getSupportFragmentManager(),
+						"setting birthday");
+			}
+		});
 
 		setHasOptionsMenu(true);
 		return view;
@@ -144,7 +144,6 @@ public class EditFragment extends Fragment implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_cancel:
-			Log.d("edit frag", "cancel");
 			if (editFragmentListener == null) {
 				throw new RuntimeException(
 						"You must set an EditFragmentListener");
@@ -154,11 +153,11 @@ public class EditFragment extends Fragment implements
 
 			return true;
 		case R.id.action_done:
-			Log.d("edit frag", "done");
-			
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd",
+					Locale.US);
 			String formattedBirthday = format.format(birthday.getTime());
-			
+
 			this.contact.setDisplayName(displayName.getText().toString());
 			this.contact.setFirstName(firstName.getText().toString());
 			this.contact.setLastName(lastName.getText().toString());

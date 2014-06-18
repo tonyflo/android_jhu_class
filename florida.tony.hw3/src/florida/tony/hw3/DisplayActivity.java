@@ -3,7 +3,6 @@ package florida.tony.hw3;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import florida.tony.hw3.DisplayFragment.DisplayFragmentListener;
 
 /*
@@ -16,7 +15,6 @@ public class DisplayActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_display);
-		Log.d("display", "on create");
 
 		DisplayFragment displayFragment = (DisplayFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.displayFragment);
@@ -29,7 +27,6 @@ public class DisplayActivity extends ActionBarActivity {
 
 					@Override
 					public void onEdit(Contact contact) {
-						Log.d("display", "edit");
 						Intent intent = new Intent(DisplayActivity.this,
 								EditActivity.class);
 						intent.putExtra("contactId", contact.getId());
@@ -38,7 +35,6 @@ public class DisplayActivity extends ActionBarActivity {
 
 					@Override
 					public void onCancel() {
-						Log.d("display", "cancel");
 						finish();
 					}
 
