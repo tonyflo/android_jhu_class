@@ -3,6 +3,7 @@ package florida.tony.hw4;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -73,6 +75,7 @@ public class MainActivity extends Activity {
 	public class DrawingView extends View {
 
 		private Shape selected;
+		private Shape hovered;
 
 		private float selectionOffsetX = 0;
 		private float selectionOffsetY = 0;
@@ -97,20 +100,18 @@ public class MainActivity extends Activity {
 		private Paint paint;
 		private Rect rect = new Rect();
 
-		private void init() {
+		private void init(int width, int height) {
 			paint = new Paint();
 			paint.setColor(Color.DKGRAY);
 
-			/**
-			 * Get the screen width and height Source:
-			 * http://stackoverflow.com/questions
-			 * /4743116/get-screen-width-and-height
-			 */
-			DisplayMetrics displaymetrics = new DisplayMetrics();
-			getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-			int screenHeight = displaymetrics.heightPixels;
-			int screenWidth = displaymetrics.widthPixels;
-
+			drawContainers(width, height);
+		} // end init
+		
+		/*
+		 * Draw the containers on the screen based on the canvas width and height
+		 */
+		private void drawContainers(int canvasWidth, int canvasHeight)
+		{
 			/**
 			 * Get shape size from dimens.xml Source:
 			 * http://stackoverflow.com/questions
@@ -119,16 +120,17 @@ public class MainActivity extends Activity {
 			 */
 			int shapeSize = (int) getResources().getDimension(
 					R.dimen.shape_size);
-			Log.d("shape", "" + shapeSize);
 
 			// draw random containers
 			for (int i = 0; i < NUM_CONTAINERS; i++) {
 				// pick a random shape type
 				Type type = (Math.random() < 0.5) ? Type.Circle : Type.Square;
 
-				// get coordinates of where to put shape
-				int xCoord = 0 + (int) (Math.random() * ((screenWidth - 0) + 1));
-				int yCoord = 0 + (int) (Math.random() * ((screenHeight - 0) + 1));
+				// get coordinates of where to put container
+				int xCoord = 0 + (int) (Math.random() * ((canvasWidth - (shapeSize)) + 1));
+				int yCoord = 0 + (int) (Math.random() * ((canvasHeight - (shapeSize)) + 1));
+				Log.d("hw4", "hw4 i=" + i + " (" + xCoord + ", " + yCoord + ")");
+
 
 				// draw shape
 				Shape shape = new Shape(type);
@@ -136,8 +138,7 @@ public class MainActivity extends Activity {
 						yCoord + shapeSize);
 				containers.add(shape);
 			}
-
-		} // end init
+		}
 
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
@@ -145,7 +146,6 @@ public class MainActivity extends Activity {
 			Drawable drawable = null;
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				Log.d("motion", "down");
 				switch (mode) {
 				case DrawCircle:
 					shape = new Shape(Type.Circle);
@@ -165,7 +165,6 @@ public class MainActivity extends Activity {
 					break;
 				} // end switch
 			case MotionEvent.ACTION_MOVE:
-				Log.d("motion", "move");
 				if (selected != null) {
 					RectF bounds = selected.getBounds();
 					float width = bounds.right - bounds.left;
@@ -177,8 +176,10 @@ public class MainActivity extends Activity {
 				}
 				break;
 			case MotionEvent.ACTION_UP:
-				Log.d("motion", "up");
-				selected = null;
+				if(findContainerAt(event.getX(), event.getY())) {
+					Log.d("hw4", "hw4 over a container");
+				}
+
 				break;
 			} // end switch
 
@@ -205,11 +206,27 @@ public class MainActivity extends Activity {
 			}
 			return null;
 		}
+		
+		private boolean findContainerAt(float x, float y) {
+			for (int i = containers.size() - 1; i >= 0; i--) {
+				Shape container = containers.get(i);
+				
+				//check if shape is above container and if it is the same type
+				if (container.getBounds().contains(x, y) && container.getType() == selected.getType()) {
+					//remove container if shape is above it
+					containers.remove(container);
+					invalidate();
+					return true;
+				}
+			}
+			return false;
+		}
 
 		@Override
 		protected void onDraw(Canvas canvas) {
 			if (paint == null) {
-				init();
+				//pass the canvas width and height to init
+				init(canvas.getWidth(), canvas.getHeight());
 			}
 
 			// draw containers
@@ -230,6 +247,7 @@ public class MainActivity extends Activity {
 				} // end switch
 			} // end for
 
+			//draw shapes
 			for (Shape shape : shapes) {
 				switch (shape.getType()) {
 				case Circle:
