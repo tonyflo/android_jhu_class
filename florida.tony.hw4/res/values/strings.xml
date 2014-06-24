@@ -4,5 +4,8 @@
     <string name="app_name">florida.tony.hw4</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="circle">Circle</string>
+    <string name="square">Square</string>
+    <string name="select">Select</string>
 
 </resources>
