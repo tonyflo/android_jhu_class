@@ -7,5 +7,6 @@
     <string name="circle">Circle</string>
     <string name="square">Square</string>
     <string name="select">Select</string>
+    <string name="startTime">0</string>
 
 </resources>

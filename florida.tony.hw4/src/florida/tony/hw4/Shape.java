@@ -1,6 +1,5 @@
 package florida.tony.hw4;
 
-import android.R.bool;
 import android.graphics.RectF;
 
 /*
@@ -11,7 +10,7 @@ public class Shape {
 	private Type type;
 
 	public static enum Type {
-		Square, Circle, SelectedSquare, SelectedCircle;
+		Square, Circle, SelectedSquare, SelectedCircle, SquareHole, CircleHole;
 	}
 
 	public Shape(Type type) {
@@ -28,14 +27,14 @@ public class Shape {
 
 	public void setSelected(boolean selected) {
 		if (selected) {
-			//selected
+			// selected
 			if (this.type == Type.Square) {
 				this.type = Type.SelectedSquare;
 			} else if (this.type == Type.Circle) {
 				this.type = Type.SelectedCircle;
 			}
 		} else {
-			//unselected
+			// unselected
 			if (this.type == Type.SelectedSquare) {
 				this.type = Type.Square;
 			} else if (this.type == Type.SelectedCircle) {

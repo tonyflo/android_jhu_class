@@ -1,7 +1,10 @@
 package florida.tony.hw4;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,13 +16,13 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 import android.widget.Toast;
 import florida.tony.hw4.Shape.Type;
 
@@ -28,27 +31,36 @@ import florida.tony.hw4.Shape.Type;
  */
 public class MainActivity extends Activity {
 
-	private static enum Mode {
-		DrawCircle, DrawSquare, Select
-	} // end Mode
-
-	private Mode mode = Mode.Select;
-
 	private Drawable square;
 	private Drawable selectedSquare;
+	private Drawable squareHole;
 	private Drawable circle;
 	private Drawable selectedCircle;
+	private Drawable circleHole;
+
+	// level variables
 	private int numContainers = 1;
+	private double bestAverage = 0.0;
+
+	// timer variables
+	private int count = 0;
+	Timer timer;
+
+	private int shapeSize;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		startStopwatch();
+
 		square = getResources().getDrawable(R.drawable.square);
 		selectedSquare = getResources().getDrawable(R.drawable.selected_square);
+		squareHole = getResources().getDrawable(R.drawable.square_hole);
 		circle = getResources().getDrawable(R.drawable.circle);
 		selectedCircle = getResources().getDrawable(R.drawable.selected_circle);
+		circleHole = getResources().getDrawable(R.drawable.circle_hole);
 
 		ViewGroup main = (ViewGroup) findViewById(R.id.main);
 		DrawingView drawingView = new DrawingView(this);
@@ -57,22 +69,36 @@ public class MainActivity extends Activity {
 		drawingView.setLayoutParams(params);
 		main.addView(drawingView);
 
+		shapeSize = (int) getResources().getDimension(R.dimen.shape_size);
+
 		Toast.makeText(getApplicationContext(),
 				"Level " + numContainers + "\nClear all the shapes. Go!",
-				Toast.LENGTH_LONG).show();
+				Toast.LENGTH_SHORT).show();
+
 	} // end onCreate
 
-	public void squarePressed(View view) {
-		mode = Mode.DrawSquare;
-	} // end squarePressed
+	/**
+	 * Display a stopwatch and update every second
+	 * http://stackoverflow.com/questions/11730902/android-simple-time-counter
+	 */
+	private void startStopwatch() {
+		timer = new Timer();
+		final TextView stopwatchText = (TextView) findViewById(R.id.stopwatch);
 
-	public void circlePressed(View view) {
-		mode = Mode.DrawCircle;
-	} // end circlePressed
-
-	public void selectPressed(View view) {
-		mode = Mode.Select;
-	} // end circlePressed
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						// in your OnCreate() method
+						stopwatchText.setText(count + "");
+						count++;
+					}
+				});
+			}
+		}, 1000, 1000);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -90,17 +116,14 @@ public class MainActivity extends Activity {
 
 		public DrawingView(Context context, AttributeSet attrs, int defStyleAttr) {
 			super(context, attrs, defStyleAttr);
-			// TODO Auto-generated constructor stub
 		} // end DrawingView
 
 		public DrawingView(Context context, AttributeSet attrs) {
 			super(context, attrs);
-			// TODO Auto-generated constructor stub
 		} // end DrawingView
 
 		public DrawingView(Context context) {
 			super(context);
-			// TODO Auto-generated constructor stub
 		} // end DrawingView
 
 		private List<Shape> shapes = new ArrayList<Shape>();
@@ -118,28 +141,29 @@ public class MainActivity extends Activity {
 			drawContainers();
 		} // end init
 
+		private int[] getRandomCoordinates() {
+			// get coordinates of where to put container
+			int xCoord = 0 + (int) (Math.random() * ((canvasWidth - (shapeSize)) + 1));
+			int yCoord = 0 + (int) (Math.random() * ((canvasHeight - (shapeSize)) + 1));
+			int[] coords = { xCoord, yCoord };
+			return coords;
+		}
+
 		/*
 		 * Draw the containers on the screen based on the canvas width and
 		 * height
 		 */
 		private void drawContainers() {
-			/**
-			 * Get shape size from dimens.xml http://stackoverflow.com/questions
-			 * /2238883/what-is-the-correct-way
-			 * -to-specify-dimensions-in-dip-from-java-code
-			 */
-			int shapeSize = (int) getResources().getDimension(
-					R.dimen.shape_size);
 
 			// draw random containers
 			for (int i = 0; i < numContainers; i++) {
 				// pick a random shape type
-				Type type = (Math.random() < 0.5) ? Type.Circle : Type.Square;
+				Type type = (Math.random() < 0.5) ? Type.CircleHole
+						: Type.SquareHole;
 
-				// get coordinates of where to put container
-				int xCoord = 0 + (int) (Math.random() * ((canvasWidth - (shapeSize)) + 1));
-				int yCoord = 0 + (int) (Math.random() * ((canvasHeight - (shapeSize)) + 1));
-				Log.d("hw4", "hw4 i=" + i + " (" + xCoord + ", " + yCoord + ")");
+				int[] randCoords = getRandomCoordinates();
+				int xCoord = randCoords[0];
+				int yCoord = randCoords[1];
 
 				// draw shape
 				Shape shape = new Shape(type);
@@ -155,34 +179,43 @@ public class MainActivity extends Activity {
 			Drawable drawable = null;
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				Log.d("hw4", "hw4 down");
-				switch (mode) {
-				case DrawCircle:
-					Log.d("hw4", "hw4 circle");
-					shape = new Shape(Type.Circle);
+
+				// get type of hole that was clicked
+				Type type = getShapeTypeOfContainerAt(event.getX(),
+						event.getY());
+
+				// if a container was touched
+				if (type != null) {
+					shape = new Shape(type);
 					drawable = circle;
-					break;
-				case DrawSquare:
-					Log.d("hw4", "hw4 square");
-					shape = new Shape(Type.Square);
-					drawable = square;
-					break;
-				case Select:
-					Log.d("hw4", "hw4 select");
-					selected = findShapeAt(event.getX(), event.getY());
 
-					if (selected != null) {
+					int[] randCoords = getRandomCoordinates();
+					int xCoord = randCoords[0];
+					int yCoord = randCoords[1];
 
-						selected.setSelected(true);
+					shape.getBounds().set(
+							xCoord - drawable.getIntrinsicWidth() / 2,
+							yCoord - drawable.getIntrinsicHeight() / 2,
+							xCoord + drawable.getIntrinsicWidth() / 2,
+							yCoord + drawable.getIntrinsicHeight() / 2);
+					shapes.add(shape);
+					invalidate();
 
-						RectF bounds = selected.getBounds();
-						selectionOffsetX = event.getX() - bounds.left;
-						selectionOffsetY = event.getY() - bounds.top;
-					}
-					break;
-				} // end switch
+					return true;
+				}
+
+				selected = findShapeAt(event.getX(), event.getY());
+
+				if (selected != null) {
+
+					selected.setSelected(true);
+
+					RectF bounds = selected.getBounds();
+					selectionOffsetX = event.getX() - bounds.left;
+					selectionOffsetY = event.getY() - bounds.top;
+				}
+
 			case MotionEvent.ACTION_MOVE:
-				Log.d("hw4", "hw4 move");
 				if (selected != null) {
 					RectF bounds = selected.getBounds();
 					float width = bounds.right - bounds.left;
@@ -194,7 +227,9 @@ public class MainActivity extends Activity {
 				}
 				break;
 			case MotionEvent.ACTION_UP:
-				Log.d("hw4", "hw4 up");
+
+				// remove container and shape if correct shape was put into
+				// container
 				if (findContainerAt(event.getX(), event.getY())) {
 					shapes.remove(findShapeAt(event.getX(), event.getY()));
 				}
@@ -207,17 +242,6 @@ public class MainActivity extends Activity {
 
 				break;
 			} // end switch
-
-			if (drawable != null) {
-				shape.getBounds().set(
-						event.getX() - drawable.getIntrinsicWidth() / 2,
-						event.getY() - drawable.getIntrinsicHeight() / 2,
-						event.getX() + drawable.getIntrinsicWidth() / 2,
-						event.getY() + drawable.getIntrinsicHeight() / 2);
-				shapes.add(shape);
-				invalidate();
-				return true;
-			} // end if
 
 			return true;
 		} // end onTouchEvent
@@ -236,13 +260,30 @@ public class MainActivity extends Activity {
 				// c shapes
 				shapes.clear();
 
-				// go to next level
-				numContainers++;
-				drawContainers();
-				
+				// calculate shapes cleared per second
+				double shapesPerSecond = ((double) numContainers) / count;
+
+				if (shapesPerSecond > bestAverage) {
+					bestAverage = shapesPerSecond;
+				}
+
+				DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
 				// display done message
-				Toast.makeText(getApplicationContext(), "You win!\nMoving on to Level " + numContainers,
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(
+						getApplicationContext(),
+						"You win!\nShapes per second: "
+								+ decimalFormat.format(shapesPerSecond)
+								+ "\nBest: "
+								+ decimalFormat.format(bestAverage)
+								+ "\nMoving on to Level " + numContainers++,
+						Toast.LENGTH_SHORT).show();
+
+				// go to next level
+				drawContainers();
+
+				// reset timer
+				count = 0;
 			}
 		}
 
@@ -273,17 +314,17 @@ public class MainActivity extends Activity {
 						return false;
 					}
 
-					// get opposite type of selection
+					// get "hole" type of selection
 					Type currentType = selected.getType();
 					Type selectedType = null;
 					if (currentType == Type.SelectedCircle) {
-						selectedType = Type.Circle;
+						selectedType = Type.CircleHole;
 					} else if (currentType == Type.SelectedSquare) {
-						selectedType = Type.Square;
+						selectedType = Type.SquareHole;
 					} else if (currentType == Type.Circle) {
-						selectedType = Type.SelectedCircle;
+						selectedType = Type.CircleHole;
 					} else if (currentType == Type.Square) {
-						selectedType = Type.SelectedSquare;
+						selectedType = Type.SquareHole;
 					}
 
 					// check if shape is the same type as containers
@@ -299,10 +340,37 @@ public class MainActivity extends Activity {
 			return false;
 		}
 
+		private Type getShapeTypeOfContainerAt(float x, float y) {
+			for (int i = containers.size() - 1; i >= 0; i--) {
+				Shape container = containers.get(i);
+
+				// check for a null container
+				if (container == null) {
+					return null;
+				}
+
+				// check if shape is above container
+				if (container.getBounds().contains(x, y)) {
+
+					// get shape type of container
+					Type currentType = container.getType();
+					Type newType = null;
+					if (currentType == Type.CircleHole) {
+						newType = Type.Circle;
+					} else if (currentType == Type.SquareHole) {
+						newType = Type.Square;
+					}
+
+					return newType;
+				}
+			}
+			return null;
+		}
+
 		@Override
 		protected void onDraw(Canvas canvas) {
 			if (paint == null) {
-				// pass the canvas width and height to init
+				// get the canvas width and height
 				canvasWidth = canvas.getWidth();
 				canvasHeight = canvas.getHeight();
 				init();
@@ -311,15 +379,15 @@ public class MainActivity extends Activity {
 			// draw containers
 			for (Shape container : containers) {
 				switch (container.getType()) {
-				case Circle:
+				case CircleHole:
 					container.getBounds().round(rect);
-					circle.setBounds(rect);
-					circle.draw(canvas);
+					circleHole.setBounds(rect);
+					circleHole.draw(canvas);
 					break;
-				case Square:
+				case SquareHole:
 					container.getBounds().round(rect);
-					square.setBounds(rect);
-					square.draw(canvas);
+					squareHole.setBounds(rect);
+					squareHole.draw(canvas);
 					break;
 				default:
 					break;

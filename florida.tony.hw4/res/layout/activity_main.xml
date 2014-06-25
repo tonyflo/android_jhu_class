@@ -3,42 +3,17 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_grey"
     android:orientation="vertical"
     tools:context="florida.tony.hw4.MainActivity" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/stopwatch"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        tools:ignore="UselessParent" >
-
-        <ImageButton
-            android:id="@+id/squareButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/square"
-            android:onClick="squarePressed"
-            android:padding="10dp"
-            android:src="@drawable/square" />
-
-        <ImageButton
-            android:id="@+id/circleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/circle"
-            android:onClick="circlePressed"
-            android:padding="10dp"
-            android:src="@drawable/circle" />
-
-        <ImageButton
-            android:id="@+id/selectButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/select"
-            android:onClick="selectPressed"
-            android:padding="10dp"
-            android:src="@drawable/select" />
-    </LinearLayout>
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="@string/startTime"
+        android:textSize="20sp" />
 
 </LinearLayout>
