@@ -10,7 +10,7 @@ public class Shape {
 	private Type type;
 
 	public static enum Type {
-		Square, Circle, SelectedSquare, SelectedCircle, SquareHole, CircleHole;
+		Square, Circle, SelectedSquare, SelectedCircle, SquareHole, CircleHole, SelectedSquareHole, SelectedCircleHole;
 	}
 
 	public Shape(Type type) {
@@ -25,7 +25,7 @@ public class Shape {
 		return type;
 	}
 
-	public void setSelected(boolean selected) {
+	public void setShapeSelected(boolean selected) {
 		if (selected) {
 			// selected
 			if (this.type == Type.Square) {
@@ -39,6 +39,24 @@ public class Shape {
 				this.type = Type.Square;
 			} else if (this.type == Type.SelectedCircle) {
 				this.type = Type.Circle;
+			}
+		}
+	}
+	
+	public void setContainerSelected(boolean selected) {
+		if (selected) {
+			// selected
+			if (this.type == Type.SquareHole) {
+				this.type = Type.SelectedSquareHole;
+			} else if (this.type == Type.CircleHole) {
+				this.type = Type.SelectedCircleHole;
+			}
+		} else {
+			// unselected
+			if (this.type == Type.SelectedSquareHole) {
+				this.type = Type.SquareHole;
+			} else if (this.type == Type.SelectedCircleHole) {
+				this.type = Type.CircleHole;
 			}
 		}
 	}

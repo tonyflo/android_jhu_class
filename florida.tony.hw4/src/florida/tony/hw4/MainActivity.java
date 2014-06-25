@@ -16,6 +16,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,9 +35,11 @@ public class MainActivity extends Activity {
 	private Drawable square;
 	private Drawable selectedSquare;
 	private Drawable squareHole;
+	private Drawable selectedSquareHole;
 	private Drawable circle;
 	private Drawable selectedCircle;
 	private Drawable circleHole;
+	private Drawable selectedCircleHole;
 
 	// level variables
 	private int numContainers = 1;
@@ -58,9 +61,13 @@ public class MainActivity extends Activity {
 		square = getResources().getDrawable(R.drawable.square);
 		selectedSquare = getResources().getDrawable(R.drawable.selected_square);
 		squareHole = getResources().getDrawable(R.drawable.square_hole);
+		selectedSquareHole = getResources().getDrawable(
+				R.drawable.selected_square_hole);
 		circle = getResources().getDrawable(R.drawable.circle);
 		selectedCircle = getResources().getDrawable(R.drawable.selected_circle);
 		circleHole = getResources().getDrawable(R.drawable.circle_hole);
+		selectedCircleHole = getResources().getDrawable(
+				R.drawable.selected_circle_hole);
 
 		ViewGroup main = (ViewGroup) findViewById(R.id.main);
 		DrawingView drawingView = new DrawingView(this);
@@ -180,6 +187,8 @@ public class MainActivity extends Activity {
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 
+				clearSelections();
+
 				// get type of hole that was clicked
 				Type type = getShapeTypeOfContainerAt(event.getX(),
 						event.getY());
@@ -208,7 +217,7 @@ public class MainActivity extends Activity {
 
 				if (selected != null) {
 
-					selected.setSelected(true);
+					selected.setShapeSelected(true);
 
 					RectF bounds = selected.getBounds();
 					selectionOffsetX = event.getX() - bounds.left;
@@ -227,7 +236,7 @@ public class MainActivity extends Activity {
 				}
 				break;
 			case MotionEvent.ACTION_UP:
-
+				Log.d("hw4", "hw4 up");
 				// remove container and shape if correct shape was put into
 				// container
 				if (findContainerAt(event.getX(), event.getY())) {
@@ -251,7 +260,12 @@ public class MainActivity extends Activity {
 
 			// unselect all shapes
 			for (Shape shape : shapes) {
-				shape.setSelected(false);
+				shape.setShapeSelected(false);
+			} // end for
+
+			// unselect all containers
+			for (Shape container : containers) {
+				container.setContainerSelected(false);
 			} // end for
 		}
 
@@ -361,6 +375,10 @@ public class MainActivity extends Activity {
 						newType = Type.Square;
 					}
 
+					// indicate that the container is selected by changing its
+					// type
+					container.setContainerSelected(true);
+
 					return newType;
 				}
 			}
@@ -388,6 +406,16 @@ public class MainActivity extends Activity {
 					container.getBounds().round(rect);
 					squareHole.setBounds(rect);
 					squareHole.draw(canvas);
+					break;
+				case SelectedSquareHole:
+					container.getBounds().round(rect);
+					selectedSquareHole.setBounds(rect);
+					selectedSquareHole.draw(canvas);
+					break;
+				case SelectedCircleHole:
+					container.getBounds().round(rect);
+					selectedCircleHole.setBounds(rect);
+					selectedCircleHole.draw(canvas);
 					break;
 				default:
 					break;
