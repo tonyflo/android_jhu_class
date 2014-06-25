@@ -3,7 +3,6 @@ package florida.tony.hw4;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -14,17 +13,19 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.Toast;
 import florida.tony.hw4.Shape.Type;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
 public class MainActivity extends Activity {
 
 	private static enum Mode {
@@ -34,8 +35,10 @@ public class MainActivity extends Activity {
 	private Mode mode = Mode.Select;
 
 	private Drawable square;
+	private Drawable selectedSquare;
 	private Drawable circle;
-	final private int NUM_CONTAINERS = 10;
+	private Drawable selectedCircle;
+	private int numContainers = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +46,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		square = getResources().getDrawable(R.drawable.square);
+		selectedSquare = getResources().getDrawable(R.drawable.selected_square);
 		circle = getResources().getDrawable(R.drawable.circle);
+		selectedCircle = getResources().getDrawable(R.drawable.selected_circle);
 
 		ViewGroup main = (ViewGroup) findViewById(R.id.main);
 		DrawingView drawingView = new DrawingView(this);
@@ -51,6 +56,10 @@ public class MainActivity extends Activity {
 				LayoutParams.MATCH_PARENT, 0, 1);
 		drawingView.setLayoutParams(params);
 		main.addView(drawingView);
+
+		Toast.makeText(getApplicationContext(),
+				"Level " + numContainers + "\nClear all the shapes. Go!",
+				Toast.LENGTH_LONG).show();
 	} // end onCreate
 
 	public void squarePressed(View view) {
@@ -75,7 +84,6 @@ public class MainActivity extends Activity {
 	public class DrawingView extends View {
 
 		private Shape selected;
-		private Shape hovered;
 
 		private float selectionOffsetX = 0;
 		private float selectionOffsetY = 0;
@@ -100,21 +108,23 @@ public class MainActivity extends Activity {
 		private Paint paint;
 		private Rect rect = new Rect();
 
-		private void init(int width, int height) {
+		private int canvasWidth = 0;
+		private int canvasHeight = 0;
+
+		private void init() {
 			paint = new Paint();
 			paint.setColor(Color.DKGRAY);
 
-			drawContainers(width, height);
+			drawContainers();
 		} // end init
-		
+
 		/*
-		 * Draw the containers on the screen based on the canvas width and height
+		 * Draw the containers on the screen based on the canvas width and
+		 * height
 		 */
-		private void drawContainers(int canvasWidth, int canvasHeight)
-		{
+		private void drawContainers() {
 			/**
-			 * Get shape size from dimens.xml Source:
-			 * http://stackoverflow.com/questions
+			 * Get shape size from dimens.xml http://stackoverflow.com/questions
 			 * /2238883/what-is-the-correct-way
 			 * -to-specify-dimensions-in-dip-from-java-code
 			 */
@@ -122,7 +132,7 @@ public class MainActivity extends Activity {
 					R.dimen.shape_size);
 
 			// draw random containers
-			for (int i = 0; i < NUM_CONTAINERS; i++) {
+			for (int i = 0; i < numContainers; i++) {
 				// pick a random shape type
 				Type type = (Math.random() < 0.5) ? Type.Circle : Type.Square;
 
@@ -130,7 +140,6 @@ public class MainActivity extends Activity {
 				int xCoord = 0 + (int) (Math.random() * ((canvasWidth - (shapeSize)) + 1));
 				int yCoord = 0 + (int) (Math.random() * ((canvasHeight - (shapeSize)) + 1));
 				Log.d("hw4", "hw4 i=" + i + " (" + xCoord + ", " + yCoord + ")");
-
 
 				// draw shape
 				Shape shape = new Shape(type);
@@ -146,18 +155,26 @@ public class MainActivity extends Activity {
 			Drawable drawable = null;
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
+				Log.d("hw4", "hw4 down");
 				switch (mode) {
 				case DrawCircle:
+					Log.d("hw4", "hw4 circle");
 					shape = new Shape(Type.Circle);
 					drawable = circle;
 					break;
 				case DrawSquare:
+					Log.d("hw4", "hw4 square");
 					shape = new Shape(Type.Square);
 					drawable = square;
 					break;
 				case Select:
+					Log.d("hw4", "hw4 select");
 					selected = findShapeAt(event.getX(), event.getY());
+
 					if (selected != null) {
+
+						selected.setSelected(true);
+
 						RectF bounds = selected.getBounds();
 						selectionOffsetX = event.getX() - bounds.left;
 						selectionOffsetY = event.getY() - bounds.top;
@@ -165,6 +182,7 @@ public class MainActivity extends Activity {
 					break;
 				} // end switch
 			case MotionEvent.ACTION_MOVE:
+				Log.d("hw4", "hw4 move");
 				if (selected != null) {
 					RectF bounds = selected.getBounds();
 					float width = bounds.right - bounds.left;
@@ -176,9 +194,16 @@ public class MainActivity extends Activity {
 				}
 				break;
 			case MotionEvent.ACTION_UP:
-				if(findContainerAt(event.getX(), event.getY())) {
-					Log.d("hw4", "hw4 over a container");
+				Log.d("hw4", "hw4 up");
+				if (findContainerAt(event.getX(), event.getY())) {
+					shapes.remove(findShapeAt(event.getX(), event.getY()));
 				}
+
+				// check if level is over
+				checkDone();
+
+				// clear selections
+				clearSelections();
 
 				break;
 			} // end switch
@@ -197,6 +222,30 @@ public class MainActivity extends Activity {
 			return true;
 		} // end onTouchEvent
 
+		private void clearSelections() {
+			selected = null;
+
+			// unselect all shapes
+			for (Shape shape : shapes) {
+				shape.setSelected(false);
+			} // end for
+		}
+
+		private void checkDone() {
+			if (containers.size() == 0) {
+				// c shapes
+				shapes.clear();
+
+				// go to next level
+				numContainers++;
+				drawContainers();
+				
+				// display done message
+				Toast.makeText(getApplicationContext(), "You win!\nMoving on to Level " + numContainers,
+						Toast.LENGTH_LONG).show();
+			}
+		}
+
 		private Shape findShapeAt(float x, float y) {
 			for (int i = shapes.size() - 1; i >= 0; i--) {
 				Shape shape = shapes.get(i);
@@ -206,17 +255,45 @@ public class MainActivity extends Activity {
 			}
 			return null;
 		}
-		
+
 		private boolean findContainerAt(float x, float y) {
 			for (int i = containers.size() - 1; i >= 0; i--) {
 				Shape container = containers.get(i);
-				
-				//check if shape is above container and if it is the same type
-				if (container.getBounds().contains(x, y) && container.getType() == selected.getType()) {
-					//remove container if shape is above it
-					containers.remove(container);
-					invalidate();
-					return true;
+
+				// check for a null container
+				if (container == null) {
+					return false;
+				}
+
+				// check if shape is above container
+				if (container.getBounds().contains(x, y)) {
+
+					// check for a null selection
+					if (selected == null) {
+						return false;
+					}
+
+					// get opposite type of selection
+					Type currentType = selected.getType();
+					Type selectedType = null;
+					if (currentType == Type.SelectedCircle) {
+						selectedType = Type.Circle;
+					} else if (currentType == Type.SelectedSquare) {
+						selectedType = Type.Square;
+					} else if (currentType == Type.Circle) {
+						selectedType = Type.SelectedCircle;
+					} else if (currentType == Type.Square) {
+						selectedType = Type.SelectedSquare;
+					}
+
+					// check if shape is the same type as containers
+					if (container.getType() == selectedType
+							|| container.getType() == currentType) {
+						// remove container if shape is above it
+						containers.remove(container);
+						invalidate();
+						return true;
+					}
 				}
 			}
 			return false;
@@ -225,8 +302,10 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onDraw(Canvas canvas) {
 			if (paint == null) {
-				//pass the canvas width and height to init
-				init(canvas.getWidth(), canvas.getHeight());
+				// pass the canvas width and height to init
+				canvasWidth = canvas.getWidth();
+				canvasHeight = canvas.getHeight();
+				init();
 			}
 
 			// draw containers
@@ -247,7 +326,7 @@ public class MainActivity extends Activity {
 				} // end switch
 			} // end for
 
-			//draw shapes
+			// draw shapes
 			for (Shape shape : shapes) {
 				switch (shape.getType()) {
 				case Circle:
@@ -259,6 +338,16 @@ public class MainActivity extends Activity {
 					shape.getBounds().round(rect);
 					square.setBounds(rect);
 					square.draw(canvas);
+					break;
+				case SelectedSquare:
+					shape.getBounds().round(rect);
+					selectedSquare.setBounds(rect);
+					selectedSquare.draw(canvas);
+					break;
+				case SelectedCircle:
+					shape.getBounds().round(rect);
+					selectedCircle.setBounds(rect);
+					selectedCircle.draw(canvas);
 					break;
 				default:
 					break;
