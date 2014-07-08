@@ -4,5 +4,11 @@
     <string name="app_name">florida.tony.hw5</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="magy">magy</string>
+    <string name="x">x</string>
+    <string name="y">y</string>
+    <string name="z">z</string>
+    <string name="magx">magx</string>
+    <string name="magz">magz</string>
 
 </resources>
