@@ -1,206 +1,346 @@
 package florida.tony.hw5;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import android.R.integer;
 import android.app.Activity;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Vibrator;
+import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Display;
-import android.view.Surface;
-import android.view.WindowManager;
+import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
+import florida.tony.hw4.R;
+import florida.tony.hw5.Shape.Type;
 
+/*
+ * Code adapted from Scott Stanchfield
+ */
 public class MainActivity extends Activity {
-	private TextView xView;
-	private TextView yView;
-	private TextView zView;
-	private TextView magxView;
-	private TextView magyView;
-	private TextView magzView;
-	private Display display;
-	private PuckView puckView;
-	private SensorManager sensorManager;
 
-	SensorEventListener accelListener = new SensorEventListener() {
-		@Override
-		public void onSensorChanged(final SensorEvent event) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					float x = 0;
-					float y = 0;
-					switch (display.getRotation()) {
-					case Surface.ROTATION_0:
-						x = event.values[0];
-						y = event.values[1];
-						break;
-					case Surface.ROTATION_90:
-						x = -event.values[1];
-						y = event.values[0];
-						break;
-					case Surface.ROTATION_180:
-						x = -event.values[0];
-						y = -event.values[1];
-						break;
-					case Surface.ROTATION_270:
-						x = event.values[1];
-						y = -event.values[0];
-						break;
-					}
-					xView.setText("" + x);
-					yView.setText("" + y);
-					zView.setText("" + event.values[2]);
-					puckView.change(-x * 5, y * 5);
-				}
-			});
-		}
+	private Drawable square;
+	private Drawable selectedSquare;
+	private Drawable squareHole;
+	private Drawable selectedSquareHole;
+	private Drawable circle;
+	private Drawable selectedCircle;
+	private Drawable circleHole;
+	private Drawable selectedCircleHole;
 
-		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-			Log.d("ACCURACY CHANGE", sensor.getName() + ": " + accuracy);
-		}
-	};
-	SensorEventListener magListener = new SensorEventListener() {
-		@Override
-		public void onSensorChanged(final SensorEvent event) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					float x = 0;
-					float y = 0;
-					switch (display.getRotation()) {
-					case Surface.ROTATION_0:
-						x = event.values[0];
-						y = event.values[1];
-						break;
-					case Surface.ROTATION_90:
-						x = -event.values[1];
-						y = event.values[0];
-						break;
-					case Surface.ROTATION_180:
-						x = -event.values[0];
-						y = -event.values[1];
-						break;
-					case Surface.ROTATION_270:
-						x = event.values[1];
-						y = -event.values[0];
-						break;
-					}
-					magxView.setText("" + x);
-					magyView.setText("" + y);
-					magzView.setText("" + event.values[2]);
-				}
-			});
-		}
+	// level variables
+	private int numContainers = 1;
+	private double bestAverage = 0.0;
 
-		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-			Log.d("ACCURACY CHANGE", sensor.getName() + ": " + accuracy);
-		}
-	};
-	private Sensor accelerometer;
-	private Sensor magnetometer;
-	private Vibrator vibrator;
+	// timer variables
+	private int count = 0;
+	Timer timer;
+
+	private int shapeSize;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
-		for (Sensor sensor : sensorList) {
-			System.out.println(sensor.getName());
-			System.out.println("  VENDOR: " + sensor.getVendor());
-			System.out.println("  TYPE: " + typeName(sensor.getType()));
-			System.out.println("  POWER: " + sensor.getPower() + "mA");
-			System.out.println("  RESOLUTION: " + sensor.getResolution());
-			System.out.println("  RANGE: " + sensor.getMaximumRange());
-		}
+		startStopwatch();
 
-		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-		display = windowManager.getDefaultDisplay();
+		square = getResources().getDrawable(R.drawable.square);
+		selectedSquare = getResources().getDrawable(R.drawable.selected_square);
+		squareHole = getResources().getDrawable(R.drawable.square_hole);
+		selectedSquareHole = getResources().getDrawable(
+				R.drawable.selected_square_hole);
+		circle = getResources().getDrawable(R.drawable.circle);
+		selectedCircle = getResources().getDrawable(R.drawable.selected_circle);
+		circleHole = getResources().getDrawable(R.drawable.circle_hole);
+		selectedCircleHole = getResources().getDrawable(
+				R.drawable.selected_circle_hole);
 
-		xView = (TextView) findViewById(R.id.x);
-		yView = (TextView) findViewById(R.id.y);
-		zView = (TextView) findViewById(R.id.z);
-		magxView = (TextView) findViewById(R.id.magx);
-		magyView = (TextView) findViewById(R.id.magy);
-		magzView = (TextView) findViewById(R.id.magz);
-		puckView = (PuckView) findViewById(R.id.puck);
+		ViewGroup main = (ViewGroup) findViewById(R.id.main);
+		DrawingView drawingView = new DrawingView(this);
+		LinearLayout.LayoutParams params = new LayoutParams(
+				LayoutParams.MATCH_PARENT, 0, 1);
+		drawingView.setLayoutParams(params);
+		main.addView(drawingView);
 
-		accelerometer = sensorManager
-				.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		magnetometer = sensorManager
-				.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-		vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		puckView.setVibrator(vibrator);
+		shapeSize = (int) getResources().getDimension(R.dimen.shape_size);
+
+		Toast.makeText(getApplicationContext(),
+				"Level " + numContainers + "\nAvoid the falling blocks!",
+				Toast.LENGTH_SHORT).show();
+
+	} // end onCreate
+
+	/**
+	 * Display a stopwatch and update every second
+	 * http://stackoverflow.com/questions/11730902/android-simple-time-counter
+	 */
+	private void startStopwatch() {
+		timer = new Timer();
+		final TextView stopwatchText = (TextView) findViewById(R.id.stopwatch);
+
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						// in your OnCreate() method
+						stopwatchText.setText(count + "");
+						count++;
+					}
+				});
+			}
+		}, 1000, 1000);
 	}
 
 	@Override
-	protected void onResume() {
-		puckView.start();
-		super.onResume();
-		sensorManager.registerListener(accelListener, accelerometer,
-				SensorManager.SENSOR_DELAY_NORMAL);
-		sensorManager.registerListener(magListener, magnetometer,
-				SensorManager.SENSOR_DELAY_NORMAL);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	} // end onCreateOptionsMenu
+
+	public class DrawingView extends View {
+
+		//animation variables
+		LinkedList<Long> times = new LinkedList<Long>();
+		private final int MAX_SIZE = 100;
+		private final double NANOS = 1000000000.0;
+		private int frameCount = 0;
+		private double dropRateSeconds = 5;
+		private int fallingSpeedPixels = 5;
 		
-	}
+		//person variables
+		private float personStartPosX;
+		private float personStartPosY;
 
-	@Override
-	protected void onPause() {
-		puckView.stop();
-		sensorManager.unregisterListener(accelListener);
-		sensorManager.unregisterListener(magListener);
-		super.onPause();
-	}
+		public DrawingView(Context context, AttributeSet attrs, int defStyleAttr) {
+			super(context, attrs, defStyleAttr);
+		} // end DrawingView
 
-	private String typeName(int type) {
-		switch (type) {
-		case Sensor.TYPE_ACCELEROMETER:
-			return "TYPE_ACCELEROMETER";
-		case Sensor.TYPE_GYROSCOPE:
-			return "TYPE_GYROSCOPE";
-		case Sensor.TYPE_LIGHT:
-			return "TYPE_LIGHT";
-		case Sensor.TYPE_MAGNETIC_FIELD:
-			return "TYPE_MAGNETIC_FIELD";
-		case Sensor.TYPE_PRESSURE:
-			return "TYPE_PRESSURE";
-		case Sensor.TYPE_PROXIMITY:
-			return "TYPE_PROXIMITY";
-		case Sensor.TYPE_AMBIENT_TEMPERATURE:
-			return "TYPE_AMBIENT_TEMPERATURE";
-		case Sensor.TYPE_GRAVITY:
-			return "TYPE_GRAVITY";
-		case Sensor.TYPE_LINEAR_ACCELERATION:
-			return "TYPE_LINEAR_ACCELERATION";
-		case Sensor.TYPE_RELATIVE_HUMIDITY:
-			return "TYPE_RELATIVE_HUMIDITY";
-		case Sensor.TYPE_ROTATION_VECTOR:
-			return "TYPE_ROTATION_VECTOR";
-		case Sensor.TYPE_ORIENTATION:
-			return "TYPE_ORIENTATION";
-		case Sensor.TYPE_TEMPERATURE:
-			return "TYPE_TEMPERATURE";
-		case Sensor.TYPE_GAME_ROTATION_VECTOR:
-			return "TYPE_GAME_ROTATION_VECTOR";
-		case Sensor.TYPE_GYROSCOPE_UNCALIBRATED:
-			return "TYPE_GYROSCOPE_UNCALIBRATED";
-		case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
-			return "TYPE_MAGNETIC_FIELD_UNCALIBRATED";
-		case Sensor.TYPE_SIGNIFICANT_MOTION:
-			return "TYPE_SIGNIFICANT_MOTION";
+		public DrawingView(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		} // end DrawingView
 
-		default:
-			return "(unknown type " + type + ")";
+		public DrawingView(Context context) {
+			super(context);
+		} // end DrawingView
+
+		//drawing variables
+		private List<Shape> shapes = new ArrayList<Shape>();
+		private List<Shape> containers = new ArrayList<Shape>();
+		private Paint paint;
+		private Rect rect = new Rect();
+
+		private int canvasWidth = 0;
+		private int canvasHeight = 0;
+
+		private void init() {
+			times.addLast(System.nanoTime());
+			
+			paint = new Paint();
+			paint.setColor(Color.DKGRAY);
+
+			drawContainer();
+			drawPerson();
+		} // end init
+
+		private int getRandomX() {
+			// get x value of where to put container
+			return (int) (Math.random() * ((canvasWidth - (shapeSize)) + 1));
 		}
-	}
 
-}
+		/*
+		 * Draw the containers on the screen based on the canvas width and
+		 * height
+		 */
+		private void drawContainer() {
+
+			// draw random containers
+			// pick a random shape type
+			Type type = (Math.random() < 0.5) ? Type.CircleHole
+					: Type.SquareHole;
+
+			int xCoord = getRandomX();
+
+			// draw shape
+			Shape shape = new Shape(type);
+			shape.getBounds().set(xCoord, 0, xCoord + shapeSize, 0 + shapeSize);
+			containers.add(shape);
+		}
+		
+		/*
+		 * Draw the person on the screen based on the canvas width and
+		 * height
+		 */
+		private void drawPerson() {
+
+			int xCoord = getRandomX();
+
+			personStartPosX = canvasWidth/2 - shapeSize/2;
+			personStartPosY = (float) (canvasHeight * 0.8);
+			
+			// draw shape
+			Shape shape = new Shape(Type.Square);
+			shape.getBounds().set(personStartPosX, personStartPosY, personStartPosX + shapeSize, personStartPosY + shapeSize);
+			shapes.add(shape);
+		}
+
+		private Shape findShapeAt(float x, float y) {
+			for (int i = shapes.size() - 1; i >= 0; i--) {
+				Shape shape = shapes.get(i);
+				if (shape.getBounds().contains(x, y)) {
+					return shape;
+				}
+			}
+			return null;
+		}
+
+		private boolean findContainerAt(float x, float y) {
+			for (int i = containers.size() - 1; i >= 0; i--) {
+				Shape container = containers.get(i);
+
+				// check for a null container
+				if (container == null) {
+					return false;
+				}
+
+				// check if shape is above container
+				if (container.getBounds().contains(x, y)) {
+					// remove container if shape is above it
+					containers.remove(container);
+					invalidate();
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		/* http://stackoverflow.com/questions/10210439/how-to-count-the-framerate-with-which-a-surfaceview-refreshes */
+		/** Calculates and returns frames per second */
+		private double fps() {
+		    long lastTime = System.nanoTime();
+		    double difference = (lastTime - times.getFirst()) / NANOS;
+		    times.addLast(lastTime);
+		    int size = times.size();
+		    if (size > MAX_SIZE) {
+		        times.removeFirst();
+		    }
+		    return difference > 0 ? times.size() / difference : 0.0;
+		}
+
+		private Type getShapeTypeOfContainerAt(float x, float y) {
+			for (int i = containers.size() - 1; i >= 0; i--) {
+				Shape container = containers.get(i);
+
+				// check for a null container
+				if (container == null) {
+					return null;
+				}
+
+				// check if shape is above container
+				if (container.getBounds().contains(x, y)) {
+
+					// get shape type of container
+					Type currentType = container.getType();
+					Type newType = null;
+					if (currentType == Type.CircleHole) {
+						newType = Type.Circle;
+					} else if (currentType == Type.SquareHole) {
+						newType = Type.Square;
+					}
+
+					// indicate that the container is selected by changing its
+					// type
+					container.setContainerSelected(true);
+
+					return newType;
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onDraw(Canvas canvas) {
+			if (paint == null) {
+				// get the canvas width and height
+				canvasWidth = canvas.getWidth();
+				canvasHeight = canvas.getHeight();
+				init();
+			}
+
+			// draw containers
+			for (Shape container : containers) {
+
+				// animate downward
+				container.moveDown(fallingSpeedPixels);
+
+				switch (container.getType()) {
+				case CircleHole:
+					container.getBounds().round(rect);
+					circleHole.setBounds(rect);
+					circleHole.draw(canvas);
+					break;
+				case SquareHole:
+					container.getBounds().round(rect);
+					squareHole.setBounds(rect);
+					squareHole.draw(canvas);
+					break;
+				default:
+					break;
+				} // end switch
+			} // end for
+
+			// draw shapes
+			for (Shape shape : shapes) {
+				switch (shape.getType()) {
+				case Circle:
+					shape.getBounds().round(rect);
+					circle.setBounds(rect);
+					circle.draw(canvas);
+					break;
+				case Square:
+					shape.getBounds().round(rect);
+					square.setBounds(rect);
+					square.draw(canvas);
+					break;
+				default:
+					break;
+				} // end switch
+			} // end for
+			
+			//calculate frames per second
+			double fps = fps();
+			//calculate seconds
+			double seconds = frameCount * (1.0/fps);
+			
+			//drop objects at a increasing rate per level
+			if(seconds >= dropRateSeconds)
+			{
+				drawContainer();
+				frameCount = 0;
+			}
+			frameCount++;
+
+			// force view to redraw
+			invalidate();
+		} // end onDraw
+	} // end DrawingView
+} // end MainActivity
