@@ -1,28 +1,31 @@
 package florida.tony.hw5;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
-import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -36,23 +39,22 @@ import florida.tony.hw5.Shape.Type;
 public class MainActivity extends Activity {
 
 	private Drawable square;
-	private Drawable selectedSquare;
 	private Drawable squareHole;
-	private Drawable selectedSquareHole;
 	private Drawable circle;
-	private Drawable selectedCircle;
 	private Drawable circleHole;
-	private Drawable selectedCircleHole;
 
 	// level variables
 	private int numContainers = 1;
-	private double bestAverage = 0.0;
 
 	// timer variables
 	private int count = 0;
 	Timer timer;
 
 	private int shapeSize;
+
+	private Sensor accelerometer;
+	private Sensor magnetometer;
+	private SensorManager sensorManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,15 +64,9 @@ public class MainActivity extends Activity {
 		startStopwatch();
 
 		square = getResources().getDrawable(R.drawable.square);
-		selectedSquare = getResources().getDrawable(R.drawable.selected_square);
 		squareHole = getResources().getDrawable(R.drawable.square_hole);
-		selectedSquareHole = getResources().getDrawable(
-				R.drawable.selected_square_hole);
 		circle = getResources().getDrawable(R.drawable.circle);
-		selectedCircle = getResources().getDrawable(R.drawable.selected_circle);
 		circleHole = getResources().getDrawable(R.drawable.circle_hole);
-		selectedCircleHole = getResources().getDrawable(
-				R.drawable.selected_circle_hole);
 
 		ViewGroup main = (ViewGroup) findViewById(R.id.main);
 		DrawingView drawingView = new DrawingView(this);
@@ -119,15 +115,127 @@ public class MainActivity extends Activity {
 
 	public class DrawingView extends View {
 
-		//animation variables
+		private Shape person;
+		private Display display;
+
+		SensorEventListener accelListener = new SensorEventListener() {
+			@Override
+			public void onSensorChanged(final SensorEvent event) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						float x = 0;
+						float y = 0;
+						switch (display.getRotation()) {
+						case Surface.ROTATION_0:
+							x = event.values[0];
+							y = event.values[1];
+							break;
+						case Surface.ROTATION_90:
+							x = -event.values[1];
+							y = event.values[0];
+							break;
+						case Surface.ROTATION_180:
+							x = -event.values[0];
+							y = -event.values[1];
+							break;
+						case Surface.ROTATION_270:
+							x = event.values[1];
+							y = -event.values[0];
+							break;
+						}
+
+						boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
+						boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
+						if (!hitLeft && !hitRight) {
+							//move freely
+							person.move(x);
+						}
+						else if(hitLeft && x < 0)
+						{
+							//get off left wall if tilting right
+							person.move(x);
+						}
+						else if(hitRight && x > 0)
+						{
+							//get off right wall if tilting left
+							person.move(x);
+						}
+
+					}
+				});
+			}
+
+			public boolean checkPersonHitLeftBounds(float left) {
+				boolean hitBounds = false;
+				// check left bounds
+				if (left < 0) {
+					left = 0;
+					hitBounds = true;
+				}
+				return hitBounds;
+			}
+
+			public boolean checkPersonHitRightBounds(float right) {
+				boolean hitBounds = false;
+				// check right bounds
+				if (right > canvasWidth) {
+					right = canvasWidth;
+					hitBounds = true;
+				}
+				return hitBounds;
+			}
+
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int accuracy) {
+				Log.d("ACCURACY CHANGE", sensor.getName() + ": " + accuracy);
+			}
+		};
+		SensorEventListener magListener = new SensorEventListener() {
+			@Override
+			public void onSensorChanged(final SensorEvent event) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						float x = 0;
+						float y = 0;
+						switch (display.getRotation()) {
+						case Surface.ROTATION_0:
+							x = event.values[0];
+							y = event.values[1];
+							break;
+						case Surface.ROTATION_90:
+							x = -event.values[1];
+							y = event.values[0];
+							break;
+						case Surface.ROTATION_180:
+							x = -event.values[0];
+							y = -event.values[1];
+							break;
+						case Surface.ROTATION_270:
+							x = event.values[1];
+							y = -event.values[0];
+							break;
+						}
+					}
+				});
+			}
+
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int accuracy) {
+				Log.d("ACCURACY CHANGE", sensor.getName() + ": " + accuracy);
+			}
+		};
+
+		// animation variables
 		LinkedList<Long> times = new LinkedList<Long>();
 		private final int MAX_SIZE = 100;
 		private final double NANOS = 1000000000.0;
 		private int frameCount = 0;
 		private double dropRateSeconds = 5;
 		private int fallingSpeedPixels = 5;
-		
-		//person variables
+
+		// person variables
 		private float personStartPosX;
 		private float personStartPosY;
 
@@ -143,7 +251,7 @@ public class MainActivity extends Activity {
 			super(context);
 		} // end DrawingView
 
-		//drawing variables
+		// drawing variables
 		private List<Shape> shapes = new ArrayList<Shape>();
 		private List<Shape> containers = new ArrayList<Shape>();
 		private Paint paint;
@@ -154,12 +262,29 @@ public class MainActivity extends Activity {
 
 		private void init() {
 			times.addLast(System.nanoTime());
-			
+
 			paint = new Paint();
 			paint.setColor(Color.DKGRAY);
 
 			drawContainer();
 			drawPerson();
+
+			// sensor management
+
+			sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+			WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+			display = windowManager.getDefaultDisplay();
+
+			accelerometer = sensorManager
+					.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+			magnetometer = sensorManager
+					.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+			sensorManager.registerListener(accelListener, accelerometer,
+					SensorManager.SENSOR_DELAY_GAME);
+			sensorManager.registerListener(magListener, magnetometer,
+					SensorManager.SENSOR_DELAY_GAME);
 		} // end init
 
 		private int getRandomX() {
@@ -182,25 +307,26 @@ public class MainActivity extends Activity {
 
 			// draw shape
 			Shape shape = new Shape(type);
+
 			shape.getBounds().set(xCoord, 0, xCoord + shapeSize, 0 + shapeSize);
 			containers.add(shape);
 		}
-		
+
 		/*
-		 * Draw the person on the screen based on the canvas width and
-		 * height
+		 * Draw the person on the screen based on the canvas width and height
 		 */
 		private void drawPerson() {
 
 			int xCoord = getRandomX();
 
-			personStartPosX = canvasWidth/2 - shapeSize/2;
+			personStartPosX = canvasWidth / 2 - shapeSize / 2;
 			personStartPosY = (float) (canvasHeight * 0.8);
-			
+
 			// draw shape
-			Shape shape = new Shape(Type.Square);
-			shape.getBounds().set(personStartPosX, personStartPosY, personStartPosX + shapeSize, personStartPosY + shapeSize);
-			shapes.add(shape);
+			person = new Shape(Type.Square);
+			person.getBounds().set(personStartPosX, personStartPosY,
+					personStartPosX + shapeSize, personStartPosY + shapeSize);
+			shapes.add(person);
 		}
 
 		private Shape findShapeAt(float x, float y) {
@@ -232,18 +358,21 @@ public class MainActivity extends Activity {
 			}
 			return false;
 		}
-		
-		/* http://stackoverflow.com/questions/10210439/how-to-count-the-framerate-with-which-a-surfaceview-refreshes */
+
+		/*
+		 * http://stackoverflow.com/questions/10210439/how-to-count-the-framerate
+		 * -with-which-a-surfaceview-refreshes
+		 */
 		/** Calculates and returns frames per second */
 		private double fps() {
-		    long lastTime = System.nanoTime();
-		    double difference = (lastTime - times.getFirst()) / NANOS;
-		    times.addLast(lastTime);
-		    int size = times.size();
-		    if (size > MAX_SIZE) {
-		        times.removeFirst();
-		    }
-		    return difference > 0 ? times.size() / difference : 0.0;
+			long lastTime = System.nanoTime();
+			double difference = (lastTime - times.getFirst()) / NANOS;
+			times.addLast(lastTime);
+			int size = times.size();
+			if (size > MAX_SIZE) {
+				times.removeFirst();
+			}
+			return difference > 0 ? times.size() / difference : 0.0;
 		}
 
 		private Type getShapeTypeOfContainerAt(float x, float y) {
@@ -266,10 +395,6 @@ public class MainActivity extends Activity {
 					} else if (currentType == Type.SquareHole) {
 						newType = Type.Square;
 					}
-
-					// indicate that the container is selected by changing its
-					// type
-					container.setContainerSelected(true);
 
 					return newType;
 				}
@@ -325,15 +450,14 @@ public class MainActivity extends Activity {
 					break;
 				} // end switch
 			} // end for
-			
-			//calculate frames per second
+
+			// calculate frames per second
 			double fps = fps();
-			//calculate seconds
-			double seconds = frameCount * (1.0/fps);
-			
-			//drop objects at a increasing rate per level
-			if(seconds >= dropRateSeconds)
-			{
+			// calculate seconds
+			double seconds = frameCount * (1.0 / fps);
+
+			// drop objects at a increasing rate per level
+			if (seconds >= dropRateSeconds) {
 				drawContainer();
 				frameCount = 0;
 			}
