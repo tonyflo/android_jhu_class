@@ -12,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -125,45 +126,47 @@ public class MainActivity extends Activity {
 					@Override
 					public void run() {
 						float x = 0;
-						float y = 0;
 						switch (display.getRotation()) {
 						case Surface.ROTATION_0:
 							x = event.values[0];
-							y = event.values[1];
 							break;
 						case Surface.ROTATION_90:
 							x = -event.values[1];
-							y = event.values[0];
 							break;
 						case Surface.ROTATION_180:
 							x = -event.values[0];
-							y = -event.values[1];
 							break;
 						case Surface.ROTATION_270:
 							x = event.values[1];
-							y = -event.values[0];
 							break;
 						}
 
-						boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
-						boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
-						if (!hitLeft && !hitRight) {
-							//move freely
-							person.move(x);
-						}
-						else if(hitLeft && x < 0)
-						{
-							//get off left wall if tilting right
-							person.move(x);
-						}
-						else if(hitRight && x > 0)
-						{
-							//get off right wall if tilting left
-							person.move(x);
-						}
+						movePerson(x);
+						findContainerAt(person.getBounds());
+
 
 					}
 				});
+			}
+			
+			public void movePerson(float x)
+			{
+				boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
+				boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
+				if (!hitLeft && !hitRight) {
+					//move freely
+					person.move(x);
+				}
+				else if(hitLeft && x < 0)
+				{
+					//get off left wall if tilting right
+					person.move(x);
+				}
+				else if(hitRight && x > 0)
+				{
+					//get off right wall if tilting left
+					person.move(x);
+				}
 			}
 
 			public boolean checkPersonHitLeftBounds(float left) {
@@ -329,17 +332,17 @@ public class MainActivity extends Activity {
 			shapes.add(person);
 		}
 
-		private Shape findShapeAt(float x, float y) {
-			for (int i = shapes.size() - 1; i >= 0; i--) {
-				Shape shape = shapes.get(i);
-				if (shape.getBounds().contains(x, y)) {
-					return shape;
-				}
-			}
-			return null;
-		}
+//		private Shape findShapeAt(float x, float y) {
+//			for (int i = shapes.size() - 1; i >= 0; i--) {
+//				Shape shape = shapes.get(i);
+//				if (shape.getBounds().contains(x, y)) {
+//					return shape;
+//				}
+//			}
+//			return null;
+//		}
 
-		private boolean findContainerAt(float x, float y) {
+		private boolean findContainerAt(RectF bounds) {
 			for (int i = containers.size() - 1; i >= 0; i--) {
 				Shape container = containers.get(i);
 
@@ -348,8 +351,9 @@ public class MainActivity extends Activity {
 					return false;
 				}
 
+			
 				// check if shape is above container
-				if (container.getBounds().contains(x, y)) {
+				if (container.getBounds().intersect(bounds.left, bounds.top, bounds.right, bounds.bottom)) {
 					// remove container if shape is above it
 					containers.remove(container);
 					invalidate();
