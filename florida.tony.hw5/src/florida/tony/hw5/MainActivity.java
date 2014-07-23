@@ -31,7 +31,6 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
-import florida.tony.hw4.R;
 import florida.tony.hw5.Shape.Type;
 
 /*
@@ -39,20 +38,29 @@ import florida.tony.hw5.Shape.Type;
  */
 public class MainActivity extends Activity {
 
+	// drawables
 	private Drawable square;
 	private Drawable squareHole;
 	private Drawable circle;
 	private Drawable circleHole;
 
 	// level variables
-	private int numContainers = 1;
+	private int level = 1;
+	private double DIFFICULITY = 0.5; // objects increase at this rate per
+										// second
+	private boolean winner = false;
 
 	// timer variables
-	private int count = 0;
+	private int SECONDS_PER_LEVEL = 15;
+	private int count = SECONDS_PER_LEVEL;
 	Timer timer;
+
+	private double dropRateSeconds = 5;
+	private int fallingSpeedPixels = 5;
 
 	private int shapeSize;
 
+	// sensor variables
 	private Sensor accelerometer;
 	private Sensor magnetometer;
 	private SensorManager sensorManager;
@@ -79,7 +87,7 @@ public class MainActivity extends Activity {
 		shapeSize = (int) getResources().getDimension(R.dimen.shape_size);
 
 		Toast.makeText(getApplicationContext(),
-				"Level " + numContainers + "\nAvoid the falling blocks!",
+				"Level " + level + "\nAvoid the falling blocks!",
 				Toast.LENGTH_SHORT).show();
 
 	} // end onCreate
@@ -100,11 +108,52 @@ public class MainActivity extends Activity {
 					public void run() {
 						// in your OnCreate() method
 						stopwatchText.setText(count + "");
-						count++;
+
+						if (count == 0) {
+							// go to next level
+							count = SECONDS_PER_LEVEL;
+							level++;
+
+							// make it harder
+							dropRateSeconds -= DIFFICULITY;
+							fallingSpeedPixels++;
+
+							if (detectWin()) {
+								stopGame();
+								
+								// alert the user
+								Toast.makeText(getApplicationContext(),
+										"You win!", Toast.LENGTH_SHORT).show();
+
+								// set winner var to true
+								winner = true;
+							} else {
+
+								// tell the user what level they are on
+								Toast.makeText(getApplicationContext(),
+										"Level " + level, Toast.LENGTH_SHORT)
+										.show();
+							}
+						}
+
+						count--;
 					}
 				});
 			}
 		}, 1000, 1000);
+	}
+	
+	private void stopGame()
+	{
+		// winner, stop the game
+		fallingSpeedPixels = 0;
+
+		// stop the timer
+		timer.cancel();
+	}
+
+	private boolean detectWin() {
+		return dropRateSeconds <= 0;
 	}
 
 	@Override
@@ -143,29 +192,30 @@ public class MainActivity extends Activity {
 
 						movePerson(x);
 						findContainerAt(person.getBounds());
-
-
 					}
 				});
 			}
-			
-			public void movePerson(float x)
-			{
+
+			public void movePerson(float x) {
 				boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
 				boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
+				boolean hitBottom = checkPersonHitBottomBounds(person
+						.getBounds().bottom);
+
 				if (!hitLeft && !hitRight) {
-					//move freely
+					// move freely
 					person.move(x);
-				}
-				else if(hitLeft && x < 0)
-				{
-					//get off left wall if tilting right
+				} else if (hitLeft && x < 0) {
+					// get off left wall if tilting right
 					person.move(x);
-				}
-				else if(hitRight && x > 0)
-				{
-					//get off right wall if tilting left
+				} else if (hitRight && x > 0) {
+					// get off right wall if tilting left
 					person.move(x);
+				} else if (hitBottom) {
+					//user lost
+					stopGame();
+					Toast.makeText(getApplicationContext(),
+							"You loose!", Toast.LENGTH_SHORT).show();
 				}
 			}
 
@@ -173,7 +223,6 @@ public class MainActivity extends Activity {
 				boolean hitBounds = false;
 				// check left bounds
 				if (left < 0) {
-					left = 0;
 					hitBounds = true;
 				}
 				return hitBounds;
@@ -183,7 +232,15 @@ public class MainActivity extends Activity {
 				boolean hitBounds = false;
 				// check right bounds
 				if (right > canvasWidth) {
-					right = canvasWidth;
+					hitBounds = true;
+				}
+				return hitBounds;
+			}
+
+			public boolean checkPersonHitBottomBounds(float bottom) {
+				boolean hitBounds = false;
+				// check bottom bounds
+				if (bottom > canvasHeight) {
 					hitBounds = true;
 				}
 				return hitBounds;
@@ -191,7 +248,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				Log.d("ACCURACY CHANGE", sensor.getName() + ": " + accuracy);
+				//stub
 			}
 		};
 		SensorEventListener magListener = new SensorEventListener() {
@@ -226,7 +283,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				Log.d("ACCURACY CHANGE", sensor.getName() + ": " + accuracy);
+				//stub
 			}
 		};
 
@@ -235,8 +292,6 @@ public class MainActivity extends Activity {
 		private final int MAX_SIZE = 100;
 		private final double NANOS = 1000000000.0;
 		private int frameCount = 0;
-		private double dropRateSeconds = 5;
-		private int fallingSpeedPixels = 5;
 
 		// person variables
 		private float personStartPosX;
@@ -320,10 +375,8 @@ public class MainActivity extends Activity {
 		 */
 		private void drawPerson() {
 
-			int xCoord = getRandomX();
-
 			personStartPosX = canvasWidth / 2 - shapeSize / 2;
-			personStartPosY = (float) (canvasHeight * 0.8);
+			personStartPosY = (float) (canvasHeight * 0.1);
 
 			// draw shape
 			person = new Shape(Type.Square);
@@ -331,16 +384,6 @@ public class MainActivity extends Activity {
 					personStartPosX + shapeSize, personStartPosY + shapeSize);
 			shapes.add(person);
 		}
-
-//		private Shape findShapeAt(float x, float y) {
-//			for (int i = shapes.size() - 1; i >= 0; i--) {
-//				Shape shape = shapes.get(i);
-//				if (shape.getBounds().contains(x, y)) {
-//					return shape;
-//				}
-//			}
-//			return null;
-//		}
 
 		private boolean findContainerAt(RectF bounds) {
 			for (int i = containers.size() - 1; i >= 0; i--) {
@@ -351,12 +394,18 @@ public class MainActivity extends Activity {
 					return false;
 				}
 
-			
 				// check if shape is above container
-				if (container.getBounds().intersect(bounds.left, bounds.top, bounds.right, bounds.bottom)) {
+				if (container.getBounds().intersect(bounds.left, bounds.top,
+						bounds.right, bounds.bottom)) {
 					// remove container if shape is above it
 					containers.remove(container);
-					invalidate();
+
+					// move person down
+					person.moveDown(shapeSize);
+
+					if (!winner) {
+						invalidate();
+					}
 					return true;
 				}
 			}
@@ -377,33 +426,6 @@ public class MainActivity extends Activity {
 				times.removeFirst();
 			}
 			return difference > 0 ? times.size() / difference : 0.0;
-		}
-
-		private Type getShapeTypeOfContainerAt(float x, float y) {
-			for (int i = containers.size() - 1; i >= 0; i--) {
-				Shape container = containers.get(i);
-
-				// check for a null container
-				if (container == null) {
-					return null;
-				}
-
-				// check if shape is above container
-				if (container.getBounds().contains(x, y)) {
-
-					// get shape type of container
-					Type currentType = container.getType();
-					Type newType = null;
-					if (currentType == Type.CircleHole) {
-						newType = Type.Circle;
-					} else if (currentType == Type.SquareHole) {
-						newType = Type.Square;
-					}
-
-					return newType;
-				}
-			}
-			return null;
 		}
 
 		@Override
@@ -467,8 +489,10 @@ public class MainActivity extends Activity {
 			}
 			frameCount++;
 
-			// force view to redraw
-			invalidate();
+			if (!winner) {
+				// force view to redraw
+				invalidate();
+			}
 		} // end onDraw
 	} // end DrawingView
 } // end MainActivity

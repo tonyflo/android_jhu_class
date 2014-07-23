@@ -8,5 +8,7 @@
     <string name="square">Square</string>
     <string name="select">Select</string>
     <string name="startTime">0</string>
+    <string name="level_">"Level "</string>
+    <string name="_avoid_the_falling_blocks_">\nAvoid the falling blocks!</string>
 
 </resources>
