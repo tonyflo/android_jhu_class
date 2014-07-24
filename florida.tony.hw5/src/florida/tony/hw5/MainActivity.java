@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.R.anim;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -37,6 +38,9 @@ import florida.tony.hw5.Shape.Type;
  * Code adapted from Scott Stanchfield
  */
 public class MainActivity extends Activity {
+
+	// state logic
+	private boolean animate;
 
 	// drawables
 	private Drawable square;
@@ -120,7 +124,7 @@ public class MainActivity extends Activity {
 
 							if (detectWin()) {
 								stopGame();
-								
+
 								// alert the user
 								Toast.makeText(getApplicationContext(),
 										"You win!", Toast.LENGTH_SHORT).show();
@@ -142,14 +146,15 @@ public class MainActivity extends Activity {
 			}
 		}, 1000, 1000);
 	}
-	
-	private void stopGame()
-	{
+
+	private void stopGame() {
+		Log.d("lose", "lost");
 		// winner, stop the game
 		fallingSpeedPixels = 0;
 
 		// stop the timer
 		timer.cancel();
+
 	}
 
 	private boolean detectWin() {
@@ -199,8 +204,7 @@ public class MainActivity extends Activity {
 			public void movePerson(float x) {
 				boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
 				boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
-				boolean hitBottom = checkPersonHitBottomBounds(person
-						.getBounds().bottom);
+				
 
 				if (!hitLeft && !hitRight) {
 					// move freely
@@ -211,11 +215,6 @@ public class MainActivity extends Activity {
 				} else if (hitRight && x > 0) {
 					// get off right wall if tilting left
 					person.move(x);
-				} else if (hitBottom) {
-					//user lost
-					stopGame();
-					Toast.makeText(getApplicationContext(),
-							"You loose!", Toast.LENGTH_SHORT).show();
 				}
 			}
 
@@ -237,18 +236,11 @@ public class MainActivity extends Activity {
 				return hitBounds;
 			}
 
-			public boolean checkPersonHitBottomBounds(float bottom) {
-				boolean hitBounds = false;
-				// check bottom bounds
-				if (bottom > canvasHeight) {
-					hitBounds = true;
-				}
-				return hitBounds;
-			}
+
 
 			@Override
 			public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				//stub
+				// stub
 			}
 		};
 		SensorEventListener magListener = new SensorEventListener() {
@@ -283,7 +275,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				//stub
+				// stub
 			}
 		};
 
@@ -319,6 +311,8 @@ public class MainActivity extends Activity {
 		private int canvasHeight = 0;
 
 		private void init() {
+			animate = true;
+
 			times.addLast(System.nanoTime());
 
 			paint = new Paint();
@@ -427,71 +421,97 @@ public class MainActivity extends Activity {
 			}
 			return difference > 0 ? times.size() / difference : 0.0;
 		}
+		
+		public boolean checkPersonHitBottomBounds(float bottom) {
+			boolean hitBounds = false;
+
+			Log.d("bound", bottom + "/" + canvasHeight);
+			// check bottom bounds
+			if (bottom > canvasHeight) {
+				hitBounds = true;
+			}
+			return hitBounds;
+		}
 
 		@Override
 		protected void onDraw(Canvas canvas) {
+
 			if (paint == null) {
 				// get the canvas width and height
 				canvasWidth = canvas.getWidth();
 				canvasHeight = canvas.getHeight();
 				init();
 			}
+			
+			if (animate) {
+				// draw containers
+				for (Shape container : containers) {
 
-			// draw containers
-			for (Shape container : containers) {
+					// animate downward
+					container.moveDown(fallingSpeedPixels);
 
-				// animate downward
-				container.moveDown(fallingSpeedPixels);
+					switch (container.getType()) {
+					case CircleHole:
+						container.getBounds().round(rect);
+						circleHole.setBounds(rect);
+						circleHole.draw(canvas);
+						break;
+					case SquareHole:
+						container.getBounds().round(rect);
+						squareHole.setBounds(rect);
+						squareHole.draw(canvas);
+						break;
+					default:
+						break;
+					} // end switch
+				} // end for
 
-				switch (container.getType()) {
-				case CircleHole:
-					container.getBounds().round(rect);
-					circleHole.setBounds(rect);
-					circleHole.draw(canvas);
-					break;
-				case SquareHole:
-					container.getBounds().round(rect);
-					squareHole.setBounds(rect);
-					squareHole.draw(canvas);
-					break;
-				default:
-					break;
-				} // end switch
-			} // end for
+				// draw shapes
+				for (Shape shape : shapes) {
+					switch (shape.getType()) {
+					case Circle:
+						shape.getBounds().round(rect);
+						circle.setBounds(rect);
+						circle.draw(canvas);
+						break;
+					case Square:
+						shape.getBounds().round(rect);
+						square.setBounds(rect);
+						square.draw(canvas);
+						break;
+					default:
+						break;
+					} // end switch
+				} // end for
 
-			// draw shapes
-			for (Shape shape : shapes) {
-				switch (shape.getType()) {
-				case Circle:
-					shape.getBounds().round(rect);
-					circle.setBounds(rect);
-					circle.draw(canvas);
-					break;
-				case Square:
-					shape.getBounds().round(rect);
-					square.setBounds(rect);
-					square.draw(canvas);
-					break;
-				default:
-					break;
-				} // end switch
-			} // end for
+				// calculate frames per second
+				double fps = fps();
+				// calculate seconds
+				double seconds = frameCount * (1.0 / fps);
 
-			// calculate frames per second
-			double fps = fps();
-			// calculate seconds
-			double seconds = frameCount * (1.0 / fps);
+				// drop objects at a increasing rate per level
+				if (seconds >= dropRateSeconds) {
+					drawContainer();
+					frameCount = 0;
+				}
+				
+				frameCount++;
+				
+				boolean hitBottom = checkPersonHitBottomBounds(person
+						.getBounds().bottom);
+				
+				if (hitBottom) {
+					// user lost
+					animate = false;
+					stopGame();
+					Toast.makeText(getApplicationContext(), "You lose!",
+							Toast.LENGTH_SHORT).show();
+				}
 
-			// drop objects at a increasing rate per level
-			if (seconds >= dropRateSeconds) {
-				drawContainer();
-				frameCount = 0;
-			}
-			frameCount++;
-
-			if (!winner) {
-				// force view to redraw
-				invalidate();
+				if (!winner) {
+					// force view to redraw
+					invalidate();
+				}
 			}
 		} // end onDraw
 	} // end DrawingView
