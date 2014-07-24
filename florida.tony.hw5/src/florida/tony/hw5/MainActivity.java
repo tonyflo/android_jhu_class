@@ -21,6 +21,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.Surface;
@@ -60,6 +61,7 @@ public class MainActivity extends Activity {
 
 	private double dropRateSeconds = 5;
 	private int fallingSpeedPixels = 5;
+	private int dropDistancePixels;
 
 	private int shapeSize;
 
@@ -169,78 +171,12 @@ public class MainActivity extends Activity {
 	public class DrawingView extends View {
 
 		private Vibrator vibrator;
+		private int magY; // y value of magnetometer
 
 		private Shape person;
 		private Display display;
 
 		SensorEventListener accelListener = new SensorEventListener() {
-			@Override
-			public void onSensorChanged(final SensorEvent event) {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						float x = 0;
-						switch (display.getRotation()) {
-						case Surface.ROTATION_0:
-							x = event.values[0];
-							break;
-						case Surface.ROTATION_90:
-							x = -event.values[1];
-							break;
-						case Surface.ROTATION_180:
-							x = -event.values[0];
-							break;
-						case Surface.ROTATION_270:
-							x = event.values[1];
-							break;
-						}
-
-						movePerson(x);
-						findContainerAt(person.getBounds());
-					}
-				});
-			}
-
-			public void movePerson(float x) {
-				boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
-				boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
-
-				if (!hitLeft && !hitRight) {
-					// move freely
-					person.move(x);
-				} else if (hitLeft && x < 0) {
-					// get off left wall if tilting right
-					person.move(x);
-				} else if (hitRight && x > 0) {
-					// get off right wall if tilting left
-					person.move(x);
-				}
-			}
-
-			public boolean checkPersonHitLeftBounds(float left) {
-				boolean hitBounds = false;
-				// check left bounds
-				if (left < 0) {
-					hitBounds = true;
-				}
-				return hitBounds;
-			}
-
-			public boolean checkPersonHitRightBounds(float right) {
-				boolean hitBounds = false;
-				// check right bounds
-				if (right > canvasWidth) {
-					hitBounds = true;
-				}
-				return hitBounds;
-			}
-
-			@Override
-			public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				// stub
-			}
-		};
-		SensorEventListener magListener = new SensorEventListener() {
 			@Override
 			public void onSensorChanged(final SensorEvent event) {
 				runOnUiThread(new Runnable() {
@@ -267,6 +203,83 @@ public class MainActivity extends Activity {
 							break;
 						}
 
+						movePerson(x, y);
+						findContainerAt(person.getBounds());
+					}
+				});
+			}
+
+			public void movePerson(float x, float y) {
+				boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
+				boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
+
+				if (!hitLeft && !hitRight) {
+					// move freely
+					person.move(x, y);
+				} else if (hitLeft && x < 0) {
+					// let off left wall if tilting right
+					person.move(x, y);
+				} else if (hitLeft && x >= 0) {
+					person.getBounds().set(0, person.getBounds().top,
+							shapeSize, person.getBounds().bottom);
+				} else if (hitRight && x > 0) {
+					// let off right wall if tilting left
+					person.move(x, y);
+				} else if (hitRight && x <= 0) {
+					person.getBounds().set(canvasWidth - shapeSize,
+							person.getBounds().top, canvasWidth,
+							person.getBounds().bottom);
+				}
+			}
+
+			public boolean checkPersonHitLeftBounds(float left) {
+				boolean hitBounds = false;
+				// check left bounds
+				if (left < 0) {
+					hitBounds = true;
+					vibrator.vibrate(50);
+				}
+				return hitBounds;
+			}
+
+			public boolean checkPersonHitRightBounds(float right) {
+				boolean hitBounds = false;
+				// check right bounds
+				if (right > canvasWidth) {
+					hitBounds = true;
+					vibrator.vibrate(50);
+				}
+				return hitBounds;
+			}
+
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int accuracy) {
+				// stub
+			}
+		};
+		SensorEventListener magListener = new SensorEventListener() {
+			@Override
+			public void onSensorChanged(final SensorEvent event) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						float y = 0;
+						switch (display.getRotation()) {
+						case Surface.ROTATION_0:
+							y = event.values[1];
+							break;
+						case Surface.ROTATION_90:
+							y = event.values[0];
+							break;
+						case Surface.ROTATION_180:
+							y = -event.values[1];
+							break;
+						case Surface.ROTATION_270:
+							y = -event.values[0];
+							break;
+						}
+
+						magY = (int) y;
 					}
 				});
 			}
@@ -395,8 +408,19 @@ public class MainActivity extends Activity {
 					// remove container if shape is above it
 					containers.remove(container);
 
+					// calculate drop distance based off of Magnetometer
+					if (magY > 0 && magY <= 10) {
+						dropDistancePixels = shapeSize / 2;
+					} else if (magY > 10) {
+						dropDistancePixels = shapeSize / 4;
+					} else if (magY > -10 && magY <= 0) {
+						dropDistancePixels = shapeSize / 3;
+					} else {
+						dropDistancePixels = shapeSize;
+					}
+
 					// move person down
-					person.moveDown(shapeSize);
+					person.moveDown(dropDistancePixels);
 
 					// vibrate
 					vibrator.vibrate(250);

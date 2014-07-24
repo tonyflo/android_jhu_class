@@ -26,8 +26,13 @@ public class Shape {
 				bounds.bottom + pixels);
 	}
 
-	public void move(float x) {
-		x *= 10;
+	public void move(float x, float y) {
+		//move left right
+		x = x * 10;
+		
+		//y value controls speed
+		x *= Math.abs(y/5);
+		
 		bounds.set(bounds.left - x, bounds.top, bounds.right - x, bounds.bottom);
 	}
 
