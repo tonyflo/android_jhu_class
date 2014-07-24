@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.R.anim;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -22,7 +21,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.Surface;
@@ -69,7 +67,6 @@ public class MainActivity extends Activity {
 	private Sensor accelerometer;
 	private Sensor magnetometer;
 	private SensorManager sensorManager;
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -150,7 +147,6 @@ public class MainActivity extends Activity {
 	}
 
 	private void stopGame() {
-		Log.d("lose", "lost");
 		// winner, stop the game
 		fallingSpeedPixels = 0;
 
@@ -171,7 +167,7 @@ public class MainActivity extends Activity {
 	} // end onCreateOptionsMenu
 
 	public class DrawingView extends View {
-		
+
 		private Vibrator vibrator;
 
 		private Shape person;
@@ -208,7 +204,6 @@ public class MainActivity extends Activity {
 			public void movePerson(float x) {
 				boolean hitLeft = checkPersonHitLeftBounds(person.getBounds().left);
 				boolean hitRight = checkPersonHitRightBounds(person.getBounds().right);
-				
 
 				if (!hitLeft && !hitRight) {
 					// move freely
@@ -239,8 +234,6 @@ public class MainActivity extends Activity {
 				}
 				return hitBounds;
 			}
-
-
 
 			@Override
 			public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -273,6 +266,7 @@ public class MainActivity extends Activity {
 							y = -event.values[0];
 							break;
 						}
+
 					}
 				});
 			}
@@ -315,9 +309,9 @@ public class MainActivity extends Activity {
 		private int canvasHeight = 0;
 
 		private void init() {
-			
+
 			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-			
+
 			animate = true;
 
 			times.addLast(System.nanoTime());
@@ -403,8 +397,8 @@ public class MainActivity extends Activity {
 
 					// move person down
 					person.moveDown(shapeSize);
-					
-					//vibrate
+
+					// vibrate
 					vibrator.vibrate(250);
 
 					if (!winner) {
@@ -431,11 +425,10 @@ public class MainActivity extends Activity {
 			}
 			return difference > 0 ? times.size() / difference : 0.0;
 		}
-		
+
 		public boolean checkPersonHitBottomBounds(float bottom) {
 			boolean hitBounds = false;
 
-			Log.d("bound", bottom + "/" + canvasHeight);
 			// check bottom bounds
 			if (bottom > canvasHeight) {
 				hitBounds = true;
@@ -453,7 +446,7 @@ public class MainActivity extends Activity {
 				canvasHeight = canvas.getHeight();
 				init();
 			}
-			
+
 			if (animate) {
 				// draw containers
 				for (Shape container : containers) {
@@ -505,12 +498,12 @@ public class MainActivity extends Activity {
 					drawContainer();
 					frameCount = 0;
 				}
-				
+
 				frameCount++;
-				
+
 				boolean hitBottom = checkPersonHitBottomBounds(person
 						.getBounds().bottom);
-				
+
 				if (hitBottom) {
 					// user lost
 					animate = false;
@@ -523,6 +516,7 @@ public class MainActivity extends Activity {
 					// force view to redraw
 					invalidate();
 				}
+
 			}
 		} // end onDraw
 	} // end DrawingView
