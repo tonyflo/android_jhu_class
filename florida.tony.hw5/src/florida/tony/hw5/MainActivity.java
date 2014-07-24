@@ -20,6 +20,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -68,6 +69,7 @@ public class MainActivity extends Activity {
 	private Sensor accelerometer;
 	private Sensor magnetometer;
 	private SensorManager sensorManager;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +171,8 @@ public class MainActivity extends Activity {
 	} // end onCreateOptionsMenu
 
 	public class DrawingView extends View {
+		
+		private Vibrator vibrator;
 
 		private Shape person;
 		private Display display;
@@ -311,6 +315,9 @@ public class MainActivity extends Activity {
 		private int canvasHeight = 0;
 
 		private void init() {
+			
+			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+			
 			animate = true;
 
 			times.addLast(System.nanoTime());
@@ -396,6 +403,9 @@ public class MainActivity extends Activity {
 
 					// move person down
 					person.moveDown(shapeSize);
+					
+					//vibrate
+					vibrator.vibrate(250);
 
 					if (!winner) {
 						invalidate();
@@ -429,6 +439,7 @@ public class MainActivity extends Activity {
 			// check bottom bounds
 			if (bottom > canvasHeight) {
 				hitBounds = true;
+				vibrator.vibrate(1000);
 			}
 			return hitBounds;
 		}
