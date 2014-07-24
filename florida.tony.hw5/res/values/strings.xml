@@ -2,13 +2,9 @@
 <resources>
 
     <string name="app_name">florida.tony.hw5</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="circle">Circle</string>
     <string name="square">Square</string>
-    <string name="select">Select</string>
-    <string name="startTime">0</string>
-    <string name="level_">"Level "</string>
-    <string name="_avoid_the_falling_blocks_">\nAvoid the falling blocks!</string>
+    <string name="startTime">15</string>
 
 </resources>
