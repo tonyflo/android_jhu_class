@@ -4,8 +4,10 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    
+    <!-- changed minSdkVersion from 10 to 16 to allow MapFragment to work -->
     <uses-sdk
-        android:minSdkVersion="10"
+        android:minSdkVersion="16" 
         android:targetSdkVersion="19" />
     
     <uses-feature

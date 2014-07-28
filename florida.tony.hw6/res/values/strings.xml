@@ -4,5 +4,8 @@
     <string name="app_name">florida.tony.hw6</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="navigate">Navigate</string>
+    <string name="show_route">Show Route</string>
+    <string name="remember_location">Remember Location</string>
 
 </resources>
