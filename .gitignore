@@ -1,1 +1,6 @@
 bin/
+appcompat*
+.metadata
+google-play-services_lib/
+Sensors/
+*_old

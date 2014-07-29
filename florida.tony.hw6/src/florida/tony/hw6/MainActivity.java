@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
 			try {
 				remoteService.add(reporter);
 			} catch (RemoteException e) {
-				Log.e("MainActivity4", "addReporter", e);
+				Log.e("MainActivity", "addReporter", e);
 			}
 		}
 	};
@@ -102,6 +102,7 @@ public class MainActivity extends Activity {
 		@Override public void report(final int n) throws RemoteException {
 			runOnUiThread(new Runnable() {
 				@Override public void run() {
+					//reporter to be notified of ship positions
 					setProgress(n * 1000);
 				}});
 		}};
