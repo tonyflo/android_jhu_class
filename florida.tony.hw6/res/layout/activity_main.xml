@@ -12,4 +12,7 @@
   map:uiScrollGestures="true"
   map:uiTiltGestures="true"
   map:uiZoomControls="false"
-  map:uiZoomGestures="true"/>
+  map:uiZoomGestures="true"
+  map:cameraTargetLat="38.9073"
+  map:cameraTargetLng="-77.0365"
+  />

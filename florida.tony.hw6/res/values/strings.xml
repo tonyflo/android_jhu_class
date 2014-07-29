@@ -7,5 +7,6 @@
     <string name="navigate">Navigate</string>
     <string name="show_route">Show Route</string>
     <string name="remember_location">Remember Location</string>
+    <string name="remote_service_permission">Remote Service Permission</string>
 
 </resources>

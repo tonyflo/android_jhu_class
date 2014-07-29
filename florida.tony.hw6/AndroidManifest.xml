@@ -14,12 +14,18 @@
 	    android:glEsVersion="0x00020000"
 	    android:required="true"/>
     
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>    
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    
+    <permission android:name="florida.tony.hw6.RemoteService" 
+        android:protectionLevel="normal" 
+        android:label="Remote Service" 
+        android:description="@string/remote_service_permission"/>
 
     <application
         android:allowBackup="true"
@@ -35,6 +41,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".RemoteServiceImpl" 
+            		android:exported="true" 
+            		android:permission="florida.tony.hw6.RemoteService">
+            <intent-filter>
+                <action android:name="florida.tony.hw6.RemoteService"/>
+            </intent-filter>
+		</service>
         
          <meta-data
 	        android:name="com.google.android.maps.v2.API_KEY"
