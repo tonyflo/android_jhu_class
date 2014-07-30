@@ -1,5 +1,18 @@
 package florida.tony.hw6;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +32,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
  */
 public class MainActivity extends Activity {
 	private static final int GOOGLE_PLAY_SETUP = 42;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +120,8 @@ public class MainActivity extends Activity {
 					setProgress(n * 1000);
 				}});
 		}};
+		
+	
 
 
 }

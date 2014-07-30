@@ -1,7 +1,19 @@
 package florida.tony.hw6;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Service;
 import android.content.Intent;
@@ -16,8 +28,47 @@ import android.widget.Toast;
 public class RemoteServiceImpl extends Service {
 	private int n = 0;
 	private class ServiceThread extends Thread {
+		
+		private String uri = "http://javadude.com/aliens/";
+		private boolean shouldContinue = true;
+		
+		private boolean makeJsonRequest(int requestNumber) throws ClientProtocolException, IOException
+		{	
+			//http return status
+			boolean returnStatus = true;
+			
+			String fullUri = uri + requestNumber + ".json";
+			HttpUriRequest request = new HttpGet(fullUri);
+			
+	        HttpClient httpclient = new DefaultHttpClient();
+	        HttpResponse response = httpclient.execute(request);
+	        StatusLine statusLine = response.getStatusLine();
+	        
+	        HttpEntity entity = response.getEntity();
+	        String resultString;
+	        if (entity != null) {
+	        	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	       		entity.writeTo(out);
+	        	out.close();
+				resultString = out.toString();
+	        } else {
+	        	resultString = statusLine.getReasonPhrase();
+	        }
+	        
+	        Log.d("status code", ""+statusLine.getStatusCode());
+	        if(statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND)
+	        {
+	        	returnStatus = false;
+	        	Log.d("DONE", "4040404");
+	        }
+	        
+	        Log.d("http", resultString);
+	        return returnStatus;
+		}
+
+		
 		@Override public void run() {
-			while(!isInterrupted()) {
+			while(!isInterrupted() && shouldContinue) {
 				n++;
 				List<RemoteServiceReporter> targets;
 				synchronized (reporters) {
@@ -31,6 +82,21 @@ public class RemoteServiceImpl extends Service {
 					}
 				}
 				Log.d("RemoteService2Impl", "running... " + n);
+				
+				//make the json request
+				try {
+					if(!makeJsonRequest(n))
+					{
+						//if json data wasn't returned, stop
+						shouldContinue = false;
+						Log.d("here", "here");
+					}
+				} catch (ClientProtocolException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 				try {
 					sleep(1000);
 				} catch (InterruptedException e) {
