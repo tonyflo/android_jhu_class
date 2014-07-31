@@ -33,7 +33,7 @@ public class RemoteServiceImpl extends Service {
 		
 		private String uri = "http://javadude.com/aliens/";
 		private boolean shouldContinue = true;
-		
+		List<UFOPosition> ufoList = null;
 		
 		private boolean makeJsonRequest(int requestNumber) throws ClientProtocolException, IOException
 		{				
@@ -65,7 +65,8 @@ public class RemoteServiceImpl extends Service {
 	        }
 	        else
 	        {
-	        	List<UFOPosition> ufoList =  parseJson(resultString);
+	        	//create a list of ufo positons
+	        	ufoList =  parseJson(resultString);
 	        }
 
 	        
@@ -85,10 +86,10 @@ public class RemoteServiceImpl extends Service {
 				e.printStackTrace();
 			}
 			for(int i = 0; i < jsonArray.length(); i++) {
-				UFOPosition ufoPosition = new UFOPosition();
-				ufoPosition.setShipNumber(Integer.parseInt(jsonArray.optJSONObject(i).optString("ship")));
-				ufoPosition.setLat(Double.parseDouble(jsonArray.optJSONObject(i).optString("lat")));
-				ufoPosition.setLon(Double.parseDouble(jsonArray.optJSONObject(i).optString("lon")));
+				int shipNumber = Integer.parseInt(jsonArray.optJSONObject(i).optString("ship"));
+				double lat = Double.parseDouble(jsonArray.optJSONObject(i).optString("lat"));
+				double lon = Double.parseDouble(jsonArray.optJSONObject(i).optString("lon"));
+				UFOPosition ufoPosition = new UFOPosition(shipNumber, lat, lon);
 				ufoList.add(ufoPosition);
 			}
 			
@@ -105,7 +106,7 @@ public class RemoteServiceImpl extends Service {
 				}
 				for(RemoteServiceReporter reporter : targets) {
 					try {
-						reporter.report(n);
+						reporter.report(ufoList);
 					} catch (RemoteException e) {
 						Log.e("RemoteService2Impl","report",e);
 					}
@@ -118,7 +119,6 @@ public class RemoteServiceImpl extends Service {
 					{
 						//if json data wasn't returned, stop
 						shouldContinue = false;
-						Log.d("here", "here");
 					}
 				} catch (ClientProtocolException e) {
 					e.printStackTrace();

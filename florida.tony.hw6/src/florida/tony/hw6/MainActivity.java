@@ -1,17 +1,6 @@
 package florida.tony.hw6;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -113,11 +102,15 @@ public class MainActivity extends Activity {
 	};
 	
 	private RemoteServiceReporter reporter = new RemoteServiceReporter.Stub() {
-		@Override public void report(final int n) throws RemoteException {
+		@Override public void report(final List<UFOPosition> ufoPosition) throws RemoteException {
 			runOnUiThread(new Runnable() {
 				@Override public void run() {
 					//reporter to be notified of ship positions
-					setProgress(n * 1000);
+					
+					for(int i = 0; i < ufoPosition.size(); i++)
+					{
+						ufoPosition.get(i).printUFOPosition();
+					}
 				}});
 		}};
 		
