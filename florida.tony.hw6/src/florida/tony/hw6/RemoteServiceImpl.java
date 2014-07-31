@@ -14,6 +14,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.app.Service;
 import android.content.Intent;
@@ -32,8 +34,9 @@ public class RemoteServiceImpl extends Service {
 		private String uri = "http://javadude.com/aliens/";
 		private boolean shouldContinue = true;
 		
+		
 		private boolean makeJsonRequest(int requestNumber) throws ClientProtocolException, IOException
-		{	
+		{				
 			//http return status
 			boolean returnStatus = true;
 			
@@ -59,11 +62,37 @@ public class RemoteServiceImpl extends Service {
 	        if(statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND)
 	        {
 	        	returnStatus = false;
-	        	Log.d("DONE", "4040404");
 	        }
+	        else
+	        {
+	        	List<UFOPosition> ufoList =  parseJson(resultString);
+	        }
+
 	        
-	        Log.d("http", resultString);
+	        //Log.d("http", resultString);
 	        return returnStatus;
+		}
+		
+		//convert the json result into a list of ships
+		private List<UFOPosition> parseJson(String jsonResult)
+		{
+			List<UFOPosition> ufoList = new ArrayList<UFOPosition>();
+			
+			JSONArray jsonArray = null;
+			try {
+				jsonArray = new JSONArray(jsonResult);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			for(int i = 0; i < jsonArray.length(); i++) {
+				UFOPosition ufoPosition = new UFOPosition();
+				ufoPosition.setShipNumber(Integer.parseInt(jsonArray.optJSONObject(i).optString("ship")));
+				ufoPosition.setLat(Double.parseDouble(jsonArray.optJSONObject(i).optString("lat")));
+				ufoPosition.setLon(Double.parseDouble(jsonArray.optJSONObject(i).optString("lon")));
+				ufoList.add(ufoPosition);
+			}
+			
+			return ufoList;
 		}
 
 		

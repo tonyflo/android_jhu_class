@@ -1,21 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-         android:id="@+id/remember"
-         android:icon="@drawable/ic_action_remember"
-         android:title="@string/remember_location"
-         android:showAsAction="ifRoom|withText"
-        />
-    <item
-         android:id="@+id/showRoute"
-         android:icon="@drawable/ic_action_show_route"
-         android:title="@string/show_route"
-         android:showAsAction="ifRoom|withText"
-        />
-    <item
-         android:id="@+id/navigate"
-         android:title="@string/navigate"
-         android:icon="@drawable/ic_action_navigate"
-         android:showAsAction="ifRoom|withText"
-        />
 </menu>

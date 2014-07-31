@@ -2,6 +2,7 @@ package florida.tony.hw6;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class UFOPosition implements Parcelable{
 	
@@ -43,6 +44,13 @@ public class UFOPosition implements Parcelable{
 	public void writeToParcel(Parcel dest, int flags) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void printUFOPosition()
+	{
+		Log.d("UFOPositon", "Ship: " + this.getShipNumber() + "\n"
+				+ "Lat: " + this.getLat() + "\n"
+				+ "Lon: " + this.getLon());
 	}
 
 }
