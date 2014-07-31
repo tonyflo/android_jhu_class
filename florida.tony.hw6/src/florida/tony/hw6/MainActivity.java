@@ -3,6 +3,7 @@ package florida.tony.hw6;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.R.integer;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +26,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -36,6 +38,7 @@ public class MainActivity extends FragmentActivity {
 	List<UFOPosition> knownUfos = new ArrayList<UFOPosition>();
 	private BitmapDescriptor ufoBitmap;
 	private GoogleMap googleMap;
+	List<Marker> ufoMarkers = new ArrayList<Marker>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -134,14 +137,20 @@ public class MainActivity extends FragmentActivity {
 				@Override
 				public void run() {
 
+					List<Integer> currentList = new ArrayList<Integer>();
+
 					for (int i = 0; i < ufoPosition.size(); i++) {
 						UFOPosition ufo = ufoPosition.get(i);
+
+						// add the number of this ship to the current list
+						int shipNumber = ufo.getShipNumber();
+						currentList.add(shipNumber);
 
 						// check to see if we know about this ship
 						int indexOfKnown = -1;
 						for (int j = 0; j < knownUfos.size(); j++) {
-							if (knownUfos.get(j).getShipNumber() == ufo
-									.getShipNumber()) {
+
+							if (knownUfos.get(j).getShipNumber() == shipNumber) {
 								indexOfKnown = j;
 								break;
 							}
@@ -150,18 +159,28 @@ public class MainActivity extends FragmentActivity {
 						if (indexOfKnown < 0) {
 							// this is a new ship
 
-							// add the ship to the list
-							knownUfos.add(ufo);
-
 							// add the ship to the map
-							googleMap.addMarker(new MarkerOptions()
-									.position(
-											new LatLng(ufo.getLat(), ufo
-													.getLon())).icon(ufoBitmap)
-									.title("UFO!"));
+							Marker marker = googleMap
+									.addMarker(new MarkerOptions()
+											.position(
+													new LatLng(ufo.getLat(),
+															ufo.getLon()))
+											.icon(ufoBitmap).title("UFO!"));
+
+							// add the ship to the lists
+							knownUfos.add(ufo);
+							ufoMarkers.add(marker);
 						} else {
+							//adjust bounds
+							//TODO
+							
+							//adjust camera
+							//TODO
+							
+							
 							// this is a known ship
 							UFOPosition knownUfo = knownUfos.get(indexOfKnown);
+							Marker ufoMarker = ufoMarkers.get(indexOfKnown);
 
 							// draw a line
 							googleMap.addPolyline((new PolylineOptions())
@@ -171,8 +190,42 @@ public class MainActivity extends FragmentActivity {
 													.getLon())).width(3)
 									.color(Color.BLUE).geodesic(true));
 
+							// remove old marker
+							ufoMarker.remove();
+
+							// remove old ufo from lists
 							knownUfos.remove(knownUfo);
+							ufoMarkers.remove(ufoMarker);
+
+							// update ufo
+							Marker marker = googleMap
+									.addMarker(new MarkerOptions()
+											.position(
+													new LatLng(ufo.getLat(),
+															ufo.getLon()))
+											.icon(ufoBitmap).title("UFO!"));
+
+							// add new ufo to lists
 							knownUfos.add(ufo);
+							ufoMarkers.add(marker);
+						} // end if
+					} // end for
+
+					// loop over known ufos to see if any of them are gone
+					for (int k = 0; k < knownUfos.size(); k++) {
+						boolean stillExists = false;
+						for (int m = 0; m < currentList.size(); m++) {
+							if (knownUfos.get(k).getShipNumber() == currentList
+									.get(m)) {
+								stillExists = true;
+							}
+						}
+						
+						if(! stillExists)
+						{
+							ufoMarkers.get(k).remove();
+							knownUfos.remove(k);
+							ufoMarkers.remove(k);
 						}
 					}
 				}
