@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+//describes a ufo object
 public class UFOPosition implements Parcelable {
 
 	private int shipNumber;

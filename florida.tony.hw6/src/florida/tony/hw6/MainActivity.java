@@ -3,8 +3,6 @@ package florida.tony.hw6;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.R.integer;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,18 +12,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -39,6 +36,10 @@ public class MainActivity extends FragmentActivity {
 	private BitmapDescriptor ufoBitmap;
 	private GoogleMap googleMap;
 	List<Marker> ufoMarkers = new ArrayList<Marker>();
+	private LatLngBounds bounds;
+	private int padding;
+	private double startLat = 38.9073;
+	private double startLon = -77.0365;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,9 @@ public class MainActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);
 
 		ufoBitmap = BitmapDescriptorFactory.fromResource(R.drawable.red_ufo);
+		padding = (int) getResources().getDimension(R.dimen.padding);
+		bounds = new LatLngBounds(new LatLng(startLat, startLon), new LatLng(
+				startLat, startLon));
 	}
 
 	@Override
@@ -85,7 +89,6 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	protected void onStart() {
-		Log.d("Main", "onStart");
 		Intent intent = new Intent("florida.tony.hw6.RemoteService");
 		if (!bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE))
 			Toast.makeText(getBaseContext(), "Could not bind to service",
@@ -95,11 +98,9 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	protected void onStop() {
-		Log.d("Main", "onStop");
 		try {
 			remoteService.remove(reporter);
 		} catch (RemoteException e) {
-			Log.e("MainActivity", "addReporter", e);
 		}
 		unbindService(serviceConnection);
 		super.onStop();
@@ -123,7 +124,6 @@ public class MainActivity extends FragmentActivity {
 			try {
 				remoteService.add(reporter);
 			} catch (RemoteException e) {
-				Log.e("MainActivity", "addReporter", e);
 			}
 		}
 	};
@@ -171,13 +171,14 @@ public class MainActivity extends FragmentActivity {
 							knownUfos.add(ufo);
 							ufoMarkers.add(marker);
 						} else {
-							//adjust bounds
-							//TODO
-							
-							//adjust camera
-							//TODO
-							
-							
+							// adjust bounds
+							bounds = bounds.including(new LatLng(ufo.getLat(),
+									ufo.getLon()));
+
+							// adjust camera
+							googleMap.animateCamera(CameraUpdateFactory
+									.newLatLngBounds(bounds, padding));
+
 							// this is a known ship
 							UFOPosition knownUfo = knownUfos.get(indexOfKnown);
 							Marker ufoMarker = ufoMarkers.get(indexOfKnown);
@@ -220,9 +221,8 @@ public class MainActivity extends FragmentActivity {
 								stillExists = true;
 							}
 						}
-						
-						if(! stillExists)
-						{
+
+						if (!stillExists) {
 							ufoMarkers.get(k).remove();
 							knownUfos.remove(k);
 							ufoMarkers.remove(k);
